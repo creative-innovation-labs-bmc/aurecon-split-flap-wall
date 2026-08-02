@@ -7,45 +7,65 @@
   --board-y: 66px;
   --section-w: 540px;
   --section-h: 672px;
+
   --aurecon-green: #89C925;
   --aurecon-grey: #373A36;
   --near-black: #1C1B1C;
   --white: #FFFFFF;
-  --panel-top: #41413e;
-  --panel-bottom: #252524;
-  --panel-border: rgba(255,255,255,.055);
-  --hinge: rgba(0,0,0,.92);
-  --highlight: rgba(255,255,255,.08);
-  --flip-half-ms: 145ms;
+
+  /* Exact treatment from the existing Melbourne split-flap clock. */
+  --panel-top: #3f3f3c;
+  --panel-bottom: #232322;
+  --hinge: rgba(0, 0, 0, 0.86);
+  --highlight: rgba(255, 255, 255, 0.08);
+  --shadow: rgba(0, 0, 0, 0.22);
+  --flip-half-ms: 300ms;
+
+  /* Macro cells use the whole flap face as a white bitmap pixel. */
+  --macro-top: #f7f7f5;
+  --macro-bottom: #d7d7d3;
 }
 
 @font-face {
   font-family: "MP-B";
-  src: url("/Melbl8-Clock03-Split-flap/MP-B.ttf") format("truetype");
-  font-display: block;
+  src: url("/Melbl8-Clock03-Split-flap/MP-B.ttf?v=20260705h") format("truetype");
+  font-weight: normal;
   font-style: normal;
-  font-weight: 400;
+  font-display: block;
 }
 
 * { box-sizing: border-box; }
-html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: var(--aurecon-grey); }
-body { color: var(--white); font-family: "MP-B", "Arial Narrow", Arial, sans-serif; font-synthesis: none; }
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--aurecon-grey);
+}
+
+body {
+  color: var(--white);
+  font-family: "MP-B", "Liberation Sans Narrow", "Arial Narrow", Arial, sans-serif;
+  font-synthesis: none;
+}
 
 #viewport {
   position: fixed;
   inset: 0;
-  display: grid;
-  place-items: center;
   overflow: hidden;
   background: var(--aurecon-grey);
 }
 
 #stage {
-  position: relative;
+  position: absolute;
+  left: 0;
+  top: 0;
   width: var(--stage-w);
   height: var(--stage-h);
   overflow: hidden;
-  transform-origin: center center;
+  transform-origin: 0 0;
   background: var(--aurecon-grey);
   contain: layout paint size style;
 }
@@ -59,7 +79,7 @@ body { color: var(--white); font-family: "MP-B", "Arial Narrow", Arial, sans-ser
   display: grid;
   grid-template-columns: repeat(7, var(--section-w));
   background: var(--near-black);
-  box-shadow: 0 0 0 2px rgba(0,0,0,.5), 0 18px 50px rgba(0,0,0,.24);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.42);
   contain: layout paint size style;
 }
 
@@ -73,20 +93,21 @@ body { color: var(--white); font-family: "MP-B", "Arial Narrow", Arial, sans-ser
   column-gap: var(--gap-x);
   row-gap: var(--gap-y);
   overflow: hidden;
+  background: var(--near-black);
   contain: layout paint size style;
 }
 
 .section + .section::before {
   content: "";
   position: absolute;
-  z-index: 20;
+  z-index: 30;
   left: 0;
   top: 0;
   bottom: 0;
-  width: 3px;
-  transform: translateX(-1px);
-  background: rgba(0,0,0,.78);
-  box-shadow: 1px 0 rgba(255,255,255,.035);
+  width: 4px;
+  transform: translateX(-2px);
+  background: rgba(0, 0, 0, 0.88);
+  box-shadow: 1px 0 rgba(255, 255, 255, 0.035);
   pointer-events: none;
 }
 
@@ -97,9 +118,8 @@ body[data-layout="49x7"] #board {
   --flap-h: 90px;
   --gap-x: 6px;
   --gap-y: 7px;
-  --cell-font: 52px;
-  --cell-font-y: 3px;
-  --macro-font: 58px;
+  --cell-font: 42px;
+  --cell-font-y: 4px;
 }
 
 body[data-layout="42x6"] #board {
@@ -109,22 +129,21 @@ body[data-layout="42x6"] #board {
   --flap-h: 107px;
   --gap-x: 6px;
   --gap-y: 6px;
-  --cell-font: 61px;
-  --cell-font-y: 4px;
-  --macro-font: 71px;
+  --cell-font: 50px;
+  --cell-font-y: 5px;
 }
 
 .flap {
   position: relative;
   width: var(--flap-w);
   height: var(--flap-h);
-  perspective: 800px;
+  perspective: 1600px;
   transform-style: preserve-3d;
   contain: layout paint style;
-  background: var(--panel-bottom);
 }
 
-.panel, .flip-half {
+.panel,
+.flip-half {
   position: absolute;
   left: 0;
   width: 100%;
@@ -133,23 +152,34 @@ body[data-layout="42x6"] #board {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   transform-style: preserve-3d;
-  border-left: 1px solid var(--panel-border);
-  border-right: 1px solid rgba(0,0,0,.16);
 }
 
-.panel.top, .flip-half.top-flip {
+.panel.top,
+.flip-half.top-flip {
   top: 0;
   transform-origin: bottom center;
-  background: linear-gradient(180deg, rgba(255,255,255,.065), rgba(0,0,0,.06)), var(--panel-top);
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(0,0,0,0.08)), var(--panel-top);
 }
 
-.panel.bottom, .flip-half.bottom-flip {
+.panel.bottom,
+.flip-half.bottom-flip {
   bottom: 0;
   transform-origin: top center;
-  background: linear-gradient(180deg, rgba(255,255,255,.012), rgba(0,0,0,.20)), var(--panel-bottom);
+  background: linear-gradient(180deg, rgba(255,255,255,0.015), rgba(0,0,0,0.22)), var(--panel-bottom);
 }
 
-.panel::before, .flip-half::before {
+.panel.top.macro-face,
+.flip-half.top-flip.macro-face {
+  background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(0,0,0,0.05)), var(--macro-top);
+}
+
+.panel.bottom.macro-face,
+.flip-half.bottom-flip.macro-face {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12)), var(--macro-bottom);
+}
+
+.panel::before,
+.flip-half::before {
   content: "";
   position: absolute;
   left: 0;
@@ -159,16 +189,31 @@ body[data-layout="42x6"] #board {
   background: var(--highlight);
 }
 
+.panel.bottom::before,
+.flip-half.bottom-flip::before {
+  top: auto;
+  bottom: 0;
+}
+
 .flip-half::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
-.flip-half.top-flip::after { background: linear-gradient(180deg, rgba(0,0,0,.04), rgba(0,0,0,.34)); opacity: .11; }
-.flip-half.bottom-flip::after { background: linear-gradient(180deg, rgba(255,255,255,.025), rgba(0,0,0,.12)); opacity: .08; }
 
-.panel span, .flip-half span {
+.flip-half.top-flip::after {
+  background: linear-gradient(180deg, rgba(0,0,0,0.04), rgba(0,0,0,0.28));
+  opacity: 0.10;
+}
+
+.flip-half.bottom-flip::after {
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.10));
+  opacity: 0.08;
+}
+
+.panel span,
+.flip-half span {
   position: absolute;
   left: 0;
   width: 100%;
@@ -178,18 +223,37 @@ body[data-layout="42x6"] #board {
   justify-content: center;
   transform: translateY(var(--cell-font-y));
   color: var(--white);
-  font-family: "MP-B", "Arial Narrow", Arial, sans-serif;
+  font-family: "MP-B", "Liberation Sans Narrow", "Arial Narrow", Arial, sans-serif;
   font-size: var(--cell-font);
-  font-weight: 400;
+  font-weight: normal;
   line-height: 1;
   text-rendering: geometricPrecision;
   -webkit-font-smoothing: antialiased;
-  font-variant-numeric: tabular-nums lining-nums;
-  font-feature-settings: "tnum" 1, "lnum" 1;
-  text-shadow: 0 2px 0 rgba(0,0,0,.18);
+  font-synthesis: none;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: "lnum" 1, "tnum" 1, "kern" 1;
+  text-shadow: 0 2px 0 rgba(0,0,0,0.14);
 }
-.panel.top span, .flip-half.top-flip span { top: 0; }
-.panel.bottom span, .flip-half.bottom-flip span { top: -100%; }
+
+.macro-face span { color: transparent; text-shadow: none; }
+
+.panel.top span,
+.flip-half.top-flip span { top: 0; }
+
+.panel.bottom span,
+.flip-half.bottom-flip span { top: -100%; }
+
+.flip-half.top-flip {
+  z-index: 5;
+  transform: rotateX(0deg);
+  box-shadow: 0 18px 20px var(--shadow);
+}
+
+.flip-half.bottom-flip {
+  z-index: 4;
+  transform: rotateX(90deg);
+  box-shadow: 0 -14px 18px var(--shadow);
+}
 
 .flap::after {
   content: "";
@@ -200,63 +264,124 @@ body[data-layout="42x6"] #board {
   top: calc(50% - 2px);
   height: 4px;
   background: var(--hinge);
-  box-shadow: 0 1px rgba(255,255,255,.025);
   pointer-events: none;
 }
 
-.flap.macro-on .panel span, .flap.macro-on .flip-half span {
-  color: var(--aurecon-green);
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: var(--macro-font);
-  transform: translateY(0);
-  text-shadow: 0 0 14px rgba(137,201,37,.18);
+.flap.flipping .top-flip {
+  animation: flipTop var(--flip-half-ms) cubic-bezier(0.38, 0.01, 0.22, 1) forwards;
 }
 
-.flip-half.top-flip { z-index: 5; transform: rotateX(0deg); }
-.flip-half.bottom-flip { z-index: 4; transform: rotateX(90deg); }
-.flap.flipping { will-change: transform; }
-.flap.flipping .top-flip { animation: flipTop var(--flip-half-ms) cubic-bezier(.38,.01,.22,1) forwards; }
-.flap.flipping .top-flip::after { animation: topShade var(--flip-half-ms) linear forwards; }
-.flap.flipping .bottom-flip { animation: flipBottom var(--flip-half-ms) cubic-bezier(.16,.88,.24,1) forwards; animation-delay: var(--flip-half-ms); }
-.flap.flipping .bottom-flip::after { animation: bottomShade var(--flip-half-ms) linear forwards; animation-delay: var(--flip-half-ms); }
+.flap.flipping .top-flip::after {
+  animation: topShade var(--flip-half-ms) linear forwards;
+}
 
-@keyframes flipTop { from { transform: rotateX(0deg); filter: brightness(1); } to { transform: rotateX(-90deg); filter: brightness(.84); } }
-@keyframes flipBottom { from { transform: rotateX(90deg); filter: brightness(.80); } to { transform: rotateX(0deg); filter: brightness(1); } }
-@keyframes topShade { from { opacity: .11; } to { opacity: .48; } }
-@keyframes bottomShade { from { opacity: .24; } to { opacity: .06; } }
+.flap.flipping .bottom-flip {
+  animation: flipBottom var(--flip-half-ms) cubic-bezier(0.16, 0.88, 0.24, 1) forwards;
+  animation-delay: var(--flip-half-ms);
+}
+
+.flap.flipping .bottom-flip::after {
+  animation: bottomShade var(--flip-half-ms) linear forwards;
+  animation-delay: var(--flip-half-ms);
+}
+
+@keyframes flipTop {
+  0% { transform: rotateX(0deg); filter: brightness(1); }
+  100% { transform: rotateX(-90deg); filter: brightness(0.88); }
+}
+
+@keyframes flipBottom {
+  0% { transform: rotateX(90deg); filter: brightness(0.82); }
+  100% { transform: rotateX(0deg); filter: brightness(1); }
+}
+
+@keyframes topShade {
+  0% { opacity: 0.10; }
+  100% { opacity: 0.42; }
+}
+
+@keyframes bottomShade {
+  0% { opacity: 0.22; }
+  100% { opacity: 0.06; }
+}
+
+.hero-colon {
+  position: absolute;
+  z-index: 50;
+  top: 0;
+  width: 28px;
+  height: var(--board-h);
+  transform: translateX(-14px);
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 90ms linear;
+}
+
+.hero-colon.is-dim { opacity: 0.08; }
+.hero-colon.is-hidden { opacity: 0; }
+
+.hero-colon::before,
+.hero-colon::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin-left: -10px;
+  border-radius: 50%;
+  background: var(--aurecon-green);
+  box-shadow:
+    0 0 12px rgba(137, 201, 37, 0.55),
+    0 0 30px rgba(137, 201, 37, 0.22);
+}
+
+body[data-layout="49x7"] .hero-colon::before { top: 232px; }
+body[data-layout="49x7"] .hero-colon::after { top: 426px; }
+body[data-layout="42x6"] .hero-colon::before { top: 156px; }
+body[data-layout="42x6"] .hero-colon::after { top: 382px; }
 
 body.debug #stage::after {
-  content: "3840 × 804  |  active board 3780 × 672  |  seams: 30 / 570 / 1110 / 1650 / 2190 / 2730 / 3270 / 3810";
+  content: "3840 × 804 | active board 3780 × 672 | seams 30 / 570 / 1110 / 1650 / 2190 / 2730 / 3270 / 3810";
   position: absolute;
   z-index: 100;
   left: 30px;
   top: 16px;
   color: var(--aurecon-green);
   font: 24px Arial, sans-serif;
-  letter-spacing: .02em;
+  letter-spacing: 0.02em;
 }
-body.debug .section { outline: 2px dashed rgba(137,201,37,.75); outline-offset: -2px; }
+
+body.debug .section {
+  outline: 2px dashed rgba(137,201,37,0.72);
+  outline-offset: -2px;
+}
+
 body.debug .section::after {
   content: attr(data-section);
   position: absolute;
-  z-index: 30;
+  z-index: 35;
   left: 8px;
   top: 7px;
-  color: rgba(137,201,37,.9);
+  color: rgba(137,201,37,0.92);
   font: 16px Arial, sans-serif;
   pointer-events: none;
 }
+
 body.debug .flap::before {
   content: attr(data-coord);
   position: absolute;
-  z-index: 30;
+  z-index: 35;
   left: 3px;
   top: 3px;
-  color: rgba(255,255,255,.26);
+  color: rgba(255,255,255,0.28);
   font: 8px Arial, sans-serif;
   pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .flap.flipping .top-flip, .flap.flipping .bottom-flip { animation-duration: 1ms; animation-delay: 0ms; }
+  .flap.flipping .top-flip,
+  .flap.flipping .bottom-flip {
+    animation-duration: 1ms;
+    animation-delay: 0ms;
+  }
 }
