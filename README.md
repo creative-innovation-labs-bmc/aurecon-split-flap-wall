@@ -8,24 +8,28 @@ Two exact-pixel split-flap wall prototypes for the 3840 × 804 video wall at Aur
 
 The site uses plain HTML, CSS and JavaScript. There is no framework, canvas, WebGL or external runtime library.
 
-## Resolved layout concept
+## Resolved composition
 
-The seven physical screen sections are divided into a **2 / 3 / 2 composition**:
+The seven physical display sections use a fixed **2 / 3 / 2** structure:
 
-- two sections on the left for rotating office clocks
-- three centre sections for the Melbourne hero
-- two sections on the right for rotating office clocks
+| Physical sections | Content |
+|---|---|
+| 1–2 | Rotating office clocks on the left |
+| 3 | Melbourne hour pair or giant `M` |
+| 4 | Melbourne minute pair or giant `E` |
+| 5 | Melbourne second pair or giant `L` |
+| 6–7 | Rotating office clocks on the right |
 
-The side rows use one split flap per character. The centre uses multiple flaps as a bitmap display.
+The side rows use one split flap per character. The three centre sections use whole flap faces as bitmap pixels, so the large clock and `MEL` are physically built from the flap grid rather than drawn as an overlay.
 
-### Centre behaviour
+Green colon dots sit on the physical seams between centre sections 3–4 and 4–5. They pulse once per second in clock mode and disappear in `MEL` mode.
 
-The centre cycles between:
+The centre normally cycles between:
 
-1. a five-row, seven-segment-style `HH:MM:SS` clock built from multiple flap cells
-2. giant `MEL`, with one letter inside each of the three centre physical sections
+1. large `HH:MM:SS` for 15 seconds
+2. giant `MEL` for 5 seconds
 
-The clock remains visible for 15 seconds. `MEL` appears for 5 seconds. This can be disabled with `?mode=clock` or `?mode=location`.
+Use `?mode=clock` or `?mode=location` to lock the centre mode.
 
 ## Exact pixel maths
 
@@ -56,15 +60,21 @@ The clock remains visible for 15 seconds. `MEL` appears for 5 seconds. This can 
 | Side capacity | 7 offices per side, 14 per page |
 | Centre | 21 × 7 cells |
 
-Centre rows:
+Each centre section fits two 3-column digits with a one-column internal gap:
 
 ```text
-MELBOURNE 17.4° SUNNY
-[ five-row macro clock or giant MEL ]
-AU SW22K HUM68 RAIN40
+HH section: 3 + 1 + 3 = 7 columns
+MM section: 3 + 1 + 3 = 7 columns
+SS section: 3 + 1 + 3 = 7 columns
 ```
 
-The 21-column clock fit is exact. It uses six two-column digits, two one-column colons and one blank column between every symbol.
+Centre information rows:
+
+```text
+MELBOURNE AU 17.4°
+[ five-row macro clock or giant MEL ]
+SUNNY SW22 H68 R40
+```
 
 ### 42 × 6
 
@@ -81,6 +91,14 @@ The 21-column clock fit is exact. It uses six two-column digits, two one-column 
 | Side capacity | 6 offices per side, 12 per page |
 | Centre | 18 × 6 cells |
 
+Each centre section exactly fits two adjacent 3-column digits:
+
+```text
+HH section: 3 + 3 = 6 columns
+MM section: 3 + 3 = 6 columns
+SS section: 3 + 3 = 6 columns
+```
+
 Rows 1–5 contain the macro clock or giant `MEL`. Row 6 alternates between:
 
 ```text
@@ -88,17 +106,35 @@ MELBOURNE AU 17.4°
 SUNNY SW22 H68 R40
 ```
 
-The compact clock uses 17 columns and is centred in the 18-column area:
+## Matched split-flap treatment
+
+The flap construction and typography are matched to the existing `Melbl8-Clock03-Split-flap` project:
+
+| Element | Matched value |
+|---|---|
+| Display font | `MP-B.ttf` |
+| Top flap | `#3f3f3c` |
+| Bottom flap | `#232322` |
+| Centre hinge | `rgba(0,0,0,0.86)` |
+| Edge highlight | `rgba(255,255,255,0.08)` |
+| Flip perspective | 1600 px |
+| Half-flip duration | 300 ms |
+| Moving top flap | Darkens during descent |
+| Colon treatment | Aurecon green dots with a one-second pulse |
+
+The MP-B font is preloaded from the existing clock project on the same GitHub Pages domain. A narrow system-font fallback remains in place for diagnostics.
+
+## Office roster and timing
+
+Melbourne remains permanently in the centre. Other offices are shown as:
 
 ```text
-HH block 5 + colon 1 + MM block 5 + colon 1 + SS block 5 = 17
+CODE HH:MM:SS
 ```
 
-## Office roster
+The office list uses IANA time zones through `Intl.DateTimeFormat`. Pages rotate every 18 seconds, and row changes are staggered so the entire wall does not flip simultaneously.
 
-The prototype includes the public Aurecon office list across Australia, New Zealand and Asia from <https://www.aurecongroup.com/locations>, excluding Melbourne because it is the permanent centre hero. Each office has an internal three-letter display code and an IANA time zone. Side pages rotate every 18 seconds and row changes are staggered.
-
-The list is stored near the top of `wall.js` for easy review and updates.
+The office list is stored near the top of `wall.js` for review and updates.
 
 ## URL controls
 
@@ -111,27 +147,42 @@ The list is stored near the top of `wall.js` for easy review and updates.
 | Lock centre to MEL | `?mode=location` | Shows giant MEL only |
 | Temperature | `?temp=18.2` | Overrides prototype temperature |
 | Condition | `?condition=CLOUDY` | Overrides condition text |
-| Wind | `?wind=SW22K` | Overrides wind text |
+| Wind | `?wind=SW22` | Overrides wind text |
 | Humidity | `?hum=68` | Overrides humidity |
 | Rain | `?rain=40` | Overrides rain percentage number |
+| Fixed test time | `?testutc=2026-08-02T04:25:38Z` | Freezes all clocks for repeatable visual QC |
 
 Parameters can be combined.
+
+## Visual and layout QC
+
+Both layouts were rendered at native 3840 × 804 and at a reduced browser viewport.
+
+Checks passed:
+
+- 49 × 7 contains exactly 343 flaps
+- 42 × 6 contains exactly 252 flaps
+- all seven sections are exactly 540 × 672 px
+- active board bounds are x 30, y 66, width 3780, height 672
+- all physical seams align to the specified coordinates
+- side office lines fit with full `HH:MM:SS`
+- the clock and `MEL` modes render in the three centre physical sections
+- colon dots hide correctly in location mode
+- scaled display remains centred without shifting
+- no page script errors were detected during the rendered checks
 
 ## NVIDIA Shield notes
 
 - Use the direct `49x7.html` or `42x6.html` page URL in signage software.
-- The stage is always 3840 × 804 and scales uniformly only when the browser viewport differs.
+- The internal stage always remains 3840 × 804.
 - Only changed flaps animate.
 - Office pages change every 18 seconds rather than continuously.
-- The app uses `Intl.DateTimeFormat` instead of a time-zone library.
 - Heavy blur, particles, canvas and WebGL are deliberately avoided.
-- `?noanim=1` is available as a fallback for diagnostics.
-
-The MP-B display font is loaded from the existing `Melbl8-Clock03-Split-flap` GitHub Pages project on the same domain. The page falls back to Arial Narrow if that asset is unavailable.
+- `?noanim=1` is available as a diagnostic fallback.
 
 ## Weather
 
-Weather is currently replaceable prototype data, supplied through defaults or URL parameters. Live Bureau of Meteorology data should be connected only after the visual layout and Shield performance are approved.
+Weather is currently replaceable prototype data supplied through defaults or URL parameters. Live Bureau of Meteorology data should be connected after the visual layout and Shield performance are approved.
 
 ## Search indexing
 
