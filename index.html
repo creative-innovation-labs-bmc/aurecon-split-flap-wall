@@ -11,21 +11,22 @@
   <style>
     :root{color-scheme:dark;--green:#89c925;--grey:#373a36;--ink:#1c1b1c;--white:#fff}
     *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--grey);color:var(--white);font-family:Arial,Helvetica,sans-serif}
-    body{display:grid;place-items:center;padding:40px}.panel{width:min(1120px,100%);background:var(--ink);border:1px solid rgba(255,255,255,.12);padding:48px;border-radius:18px}
-    h1{font-size:clamp(36px,5vw,72px);line-height:.95;margin:0 0 18px}p{color:rgba(255,255,255,.72);font-size:18px;line-height:1.55;max-width:850px}
-    .choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-top:36px}.choice{display:block;color:inherit;text-decoration:none;border:1px solid rgba(255,255,255,.18);padding:28px;border-radius:12px;background:#242524}.choice:hover,.choice:focus-visible{border-color:var(--green);outline:none}.choice strong{display:block;color:var(--green);font-size:34px;margin-bottom:8px}.choice span{color:rgba(255,255,255,.72)}
-    code{color:var(--green)}@media(max-width:720px){body{padding:16px}.panel{padding:28px}.choices{grid-template-columns:1fr}}
+    body{display:grid;place-items:center;padding:40px}.panel{width:min(1280px,100%);background:var(--ink);border:1px solid rgba(255,255,255,.12);padding:48px;border-radius:18px}
+    h1{font-size:clamp(36px,5vw,72px);line-height:.95;margin:0 0 18px}p{color:rgba(255,255,255,.72);font-size:18px;line-height:1.55;max-width:980px}
+    .choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:36px}.choice{display:block;color:inherit;text-decoration:none;border:1px solid rgba(255,255,255,.18);padding:28px;border-radius:12px;background:#242524}.choice:hover,.choice:focus-visible{border-color:var(--green);outline:none}.choice strong{display:block;color:var(--green);font-size:30px;margin-bottom:8px}.choice span{color:rgba(255,255,255,.72);line-height:1.45}
+    code{color:var(--green)}@media(max-width:900px){body{padding:16px}.panel{padding:28px}.choices{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
   <main class="panel">
     <h1>Aurecon split-flap wall</h1>
-    <p>Two exact-pixel prototypes for the 3840 × 804 Melbourne video wall. Both use seven 540 × 672 physical sections, a permanent Melbourne hero in the centre, and rotating Aurecon office clocks on the left and right.</p>
+    <p>The rebuilt 49 × 7 concepts give Melbourne most of the wall. Both use five-row, five-column pixel digits, with two stacked office cards on each side.</p>
     <div class="choices">
-      <a class="choice" href="49x7.html"><strong>49 × 7</strong><span>343 flaps. Denser airport-board texture. Seven offices per side.</span></a>
-      <a class="choice" href="42x6.html"><strong>42 × 6</strong><span>252 flaps. Larger modules and stronger distance readability. Six offices per side.</span></a>
+      <a class="choice" href="49x7-codes.html"><strong>49 × 7 · Codes</strong><span>Recommended. Five columns per side and 39 columns for Melbourne. Side cards use airport-style codes, country and HH:MM.</span></a>
+      <a class="choice" href="49x7-cities.html"><strong>49 × 7 · Cities</strong><span>Seven columns per side and 35 columns for Melbourne. Side cards use short city names, country and HH:MM.</span></a>
+      <a class="choice" href="42x6.html"><strong>42 × 6 · Previous</strong><span>The earlier, larger-flap comparison remains available.</span></a>
     </div>
-    <p>Useful controls: <code>?debug=1</code>, <code>?noanim=1</code>, <code>?cycle=0</code>, <code>?mode=clock</code>, and weather overrides such as <code>?temp=17.4</code>.</p>
+    <p>Useful controls: <code>?debug=1</code>, <code>?noanim=1</code>, <code>?cycle=0</code>, and weather overrides such as <code>?temp=17.4</code>.</p>
   </main>
 </body>
 </html>
