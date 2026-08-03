@@ -1,74 +1,44 @@
 # Aurecon split-flap wall
 
-Split-flap wall prototypes for the 3840 × 804 display at Aurecon Centre, 850 Collins Street, Docklands, Melbourne.
+Live split-flap wall for the 3840 × 804 display at Aurecon Centre, 850 Collins Street, Docklands, Melbourne.
 
-## Current 49 × 7 rebuild
+## Current preferred build
 
-Two 49 × 7 options maximise the Melbourne pixel clock:
-
-- `49x7-codes.html` uses narrow airport-code cards and gives Melbourne **39 columns**.
-- `49x7-cities.html` uses short city-name cards and gives Melbourne **35 columns**.
-- `49x7.html` points to the recommended airport-code version.
-- `42x6.html` remains available as the earlier comparison.
-
-All versions use plain HTML, CSS and JavaScript. There is no framework, canvas, WebGL or external runtime library.
-
-## Exact shared grid
-
-| Item | Value |
-|---|---:|
-| Stage | 3840 × 804 px |
-| Active board | 3780 × 672 px |
-| Side margins | 30 px |
-| Top/bottom margins | 66 px |
-| Grid | 49 columns × 7 rows |
-| Physical sections | 7 |
-| Each section | 540 × 672 px |
-| Single flap | 72 × 90 px |
-| Horizontal gap | 6 px |
-| Vertical gap | 7 px |
-| Total flaps | 343 |
-
-The physical section maths remains exact:
-
-```text
-7 × 72 + 6 × 6 = 540 px
-7 × 90 + 6 × 7 = 672 px
-```
-
-## Option A: airport-code cards
-
-```text
-5 columns | 39-column Melbourne hero | 5 columns
-```
-
-Each side shows two stacked cards:
-
-```text
-SYD
-AUS
-14:25
-
-PER
-AUS
-12:25
-```
-
-The 39-column clock fit is exact:
-
-```text
-5 + gap + 5 + gap + colon + gap + 5 + gap + 5 + gap + colon + gap + 5 + gap + 5 = 39
-```
-
-This is the recommended version because the side information stays legible while the Melbourne clock gets the most flap area.
-
-## Option B: city-name cards
+`49x7.html` and `49x7-live.html` use the selected Option 2 layout:
 
 ```text
 7 columns | 35-column Melbourne hero | 7 columns
 ```
 
-Each side shows two stacked cards:
+- 49 columns × 7 rows
+- 343 split-flap modules
+- 72 × 90 px per flap
+- 6 px horizontal gaps
+- 7 px vertical gaps
+- two stacked office cards on each side
+- longer seven-character office names
+- centred 4 × 5 macro digits
+- 24-hour `HH:MM:SS`
+- two-column gaps between HH, MM and SS
+- green blinking colon dots split across the two gap flaps
+
+## Melbourne clock geometry
+
+The centre has 35 columns. The active clock occupies 31 columns and is centred with two blank columns on each side:
+
+```text
+2 margin
+9 columns HH  = 4 + 1 + 4
+2 columns split colon
+9 columns MM  = 4 + 1 + 4
+2 columns split colon
+9 columns SS  = 4 + 1 + 4
+2 margin
+```
+
+## Side office cards
+
+Four offices are visible at once, two per side:
 
 ```text
 SYDNEY
@@ -80,96 +50,74 @@ AUS
 12:25
 ```
 
-Long city names use curated seven-character display forms such as `BRISBNE`, `AUCKLND` and `SINGAPR`.
+Office pages rotate every 14 seconds. Local office times update each minute. Melbourne remains permanently in the centre.
 
-The 35-column clock fit is exact:
+The office roster follows the current Aurecon locations page and includes offices across Australia, New Zealand and Asia. Melbourne is excluded from the side rotation because it is the hero location.
 
-```text
-11-column HH + 1-column colon + 11-column MM + 1-column colon + 11-column SS = 35
-```
+## Real-time weather
 
-Each pair uses two five-column digits with one internal gap.
+The wall uses the Bureau of Meteorology's Melbourne (Olympic Park) observation feed, station WMO `95936`, which is the nearest standard BOM observation used for Docklands.
 
-## Melbourne hero
+A GitHub Actions workflow runs every 10 minutes:
 
-The centre uses:
+1. `scripts/fetch_weather.py` fetches the official BOM JSON feed.
+2. It writes a small same-origin `weather.json` file.
+3. The page refreshes `weather.json` every five minutes.
+4. Only weather characters that changed flip.
 
-```text
-MELBOURNE AUSTRALIA 17.4° SUNNY
-[ five-row, five-column pixel HH:MM:SS ]
-WIND SW22KMH HUMIDITY 68% RAIN 40%
-```
+This avoids browser CORS problems on GitHub Pages and keeps the NVIDIA Shield implementation static and lightweight.
 
-The large digits are built from complete split-flap faces. Only changed cells animate. The green colon dots follow the treatment used in the existing Melbourne split-flap clock.
+Displayed fields:
 
-## Side office cycling
+- current air temperature
+- wind direction and speed
+- relative humidity
+- rain since 9 am in millimetres
 
-Four offices are visible at once:
+The BOM observation feed does not reliably provide a simple `SUNNY` or `CLOUDY` label. The header therefore shows `LIVE` unless the observation contains an explicit weather condition. Rain is shown in millimetres since 9 am, not as a forecast percentage.
 
-- two on the left
-- two on the right
-- three rows per office: name/code, country, local HH:MM
-- one blank separator row between the two cards
+## Matched split-flap treatment
 
-Pages rotate every 14 seconds. Cards are staggered so the entire side wall does not flip simultaneously. Side times update only when the minute changes.
+- font: `MP-B.ttf`
+- top flap: `#3f3f3c`
+- bottom flap: `#232322`
+- hinge: `rgba(0,0,0,0.86)`
+- perspective: 1600 px
+- half-flip duration: 300 ms
+- darker descending top flap
+- Aurecon green `#89C925` split-circle colons
+- Aurecon grey `#373A36` stage
 
-## Matched flap treatment
+## Performance
 
-The 49 × 7 rebuild matches `Melbl8-Clock03-Split-flap`:
+Designed for NVIDIA Shield signage playback:
 
-| Element | Value |
-|---|---|
-| Font | `MP-B.ttf` |
-| Top flap | `#3f3f3c` |
-| Bottom flap | `#232322` |
-| Hinge | `rgba(0,0,0,0.86)` |
-| Perspective | 1600 px |
-| Half-flip duration | 300 ms |
-| Moving top flap | Darkens during descent |
-| Colon | Aurecon green dots, pulsed each second |
+- plain HTML, CSS and JavaScript
+- no canvas
+- no WebGL
+- no framework
+- no continuous 60 fps loop
+- only changed cells animate
+- side office clocks update once per minute
+- weather refreshes every five minutes
+- office pages rotate every 14 seconds
 
 ## URL controls
 
 | Parameter | Effect |
 |---|---|
-| `?debug=1` | Shows section, cell and content-zone guides |
+| `?debug=1` | Shows cell and zone guides |
 | `?noanim=1` | Changes cells instantly |
-| `?cycle=0` | Holds the first four offices |
-| `?temp=18.2` | Overrides temperature |
-| `?condition=CLOUDY` | Overrides condition |
-| `?wind=SW22KMH` | Overrides wind |
+| `?cycle=0` | Stops office page rotation |
+| `?page=3` | Starts on a specific office page |
+| `?testutc=2026-08-03T12:22:22+10:00` | Freezes clocks for QC |
+| `?temp=17.4` | Overrides temperature |
+| `?condition=LIVE` | Overrides weather label |
+| `?winddir=SW` | Overrides wind direction |
+| `?wind=22` | Overrides wind speed |
 | `?hum=68` | Overrides humidity |
-| `?rain=40` | Overrides rain percentage |
-| `?testutc=2026-08-03T03:24:56Z` | Freezes clocks for repeatable QC |
-
-## Visual QC
-
-Both new 49 × 7 pages were rendered at 3840 × 804.
-
-Checks passed:
-
-- exactly 343 flaps
-- board bounds x 30, y 66, width 3780, height 672
-- two centre colon overlays
-- two permanent content-zone dividers
-- airport-code centre width 39 columns
-- city-name centre width 35 columns
-- all six five-column digits fit without clipping
-- two stacked office cards fit on each side
-- scaled 1920 × 500 display remains centred
-- no JavaScript page errors were detected
-
-The local QC environment cannot load the cross-project MP-B font URL, so local screenshots use the narrow fallback. The deployed GitHub Pages versions load MP-B from the existing split-flap project on the same domain.
-
-## NVIDIA Shield notes
-
-- Use the direct page URL in signage software.
-- The internal stage remains 3840 × 804 and scales uniformly.
-- Only changed cells animate.
-- Side clocks use HH:MM rather than seconds to reduce unnecessary updates.
-- No canvas, WebGL, particles or continuous 60 fps loop is used.
-- `?noanim=1` remains available for diagnostics.
+| `?rain=0.0` | Overrides rain since 9 am |
 
 ## Search indexing
 
-All pages include `noindex`, `nofollow` and `noarchive`. `robots.txt` also disallows crawling. This reduces discoverability but is not access control.
+All pages include `noindex`, `nofollow` and `noarchive`. This reduces discoverability but is not access control.
