@@ -1,0 +1,41 @@
+name: Repair production alignment and Pages
+
+on:
+  push:
+    paths:
+      - "tools/repair_alignment_and_pages.py"
+      - ".github/workflows/repair-production.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: repair-production
+  cancel-in-progress: true
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Apply production repair
+        run: python tools/repair_alignment_and_pages.py
+      - name: Commit production files
+        run: |
+          if git diff --quiet -- wall-live.js 49x7.html 49x7-live.html README.md .nojekyll; then
+            echo "No production changes required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add wall-live.js 49x7.html 49x7-live.html README.md .nojekyll
+          git commit -m "Fix right-side office alignment and static Pages build [skip ci]"
+          git pull --rebase origin main
+          git push
