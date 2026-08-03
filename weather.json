@@ -1,0 +1,14 @@
+{
+  "source": "Bureau of Meteorology",
+  "station": "Melbourne (Olympic Park)",
+  "station_wmo": 95936,
+  "status": "waiting_for_first_update",
+  "temp_c": null,
+  "condition": "WAIT",
+  "wind_dir": null,
+  "wind_kmh": null,
+  "humidity_pct": null,
+  "rain_since_9am_mm": null,
+  "observation_utc": null,
+  "updated_utc": null
+}
