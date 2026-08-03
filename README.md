@@ -7,7 +7,7 @@ Live split-flap wall for the 3840 × 804 display at Aurecon Centre, 850 Collins 
 `49x7.html` and `49x7-live.html` use the selected Option 2 layout:
 
 ```text
-7 columns | 35-column Melbourne hero | 7 columns
+8 columns | 33-column Melbourne hero | 8 columns
 ```
 
 - 49 columns × 7 rows
@@ -16,7 +16,7 @@ Live split-flap wall for the 3840 × 804 display at Aurecon Centre, 850 Collins 
 - 6 px horizontal gaps
 - 7 px vertical gaps
 - two stacked office cards on each side
-- longer seven-character office names
+- wider eight-column office names
 - centred 4 × 5 macro digits
 - 24-hour `HH:MM:SS`
 - two-column gaps between HH, MM and SS
@@ -24,16 +24,16 @@ Live split-flap wall for the 3840 × 804 display at Aurecon Centre, 850 Collins 
 
 ## Melbourne clock geometry
 
-The centre has 35 columns. The active clock occupies 31 columns and is centred with two blank columns on each side:
+The centre has 33 columns. The active clock occupies 31 columns and is centred with one blank column on each side:
 
 ```text
-2 margin
+1 margin
 9 columns HH  = 4 + 1 + 4
 2 columns split colon
 9 columns MM  = 4 + 1 + 4
 2 columns split colon
 9 columns SS  = 4 + 1 + 4
-2 margin
+1 margin
 ```
 
 ## Side office cards
@@ -50,7 +50,7 @@ AUS
 12:25
 ```
 
-Office pages rotate every 14 seconds. Local office times update each minute. Melbourne remains permanently in the centre.
+Office pages rotate every 14 seconds. Local office times update each minute. Melbourne remains permanently in the centre. The office name, country and time lines cascade in separately, and the four cards are staggered across the wall on first load and every page change.
 
 The office roster follows the current Aurecon locations page and includes offices across Australia, New Zealand and Asia. Melbourne is excluded from the side rotation because it is the hero location.
 
@@ -90,7 +90,7 @@ The BOM observation feed often leaves the plain-language weather field blank. In
 - perspective: 1600 px
 - half-flip duration: 300 ms
 - darker descending top flap
-- Aurecon green `#89C925` split-circle colons
+- Aurecon green `#89C925` split-circle hero colons and blinking mini office-time colons
 - Aurecon grey `#373A36` stage
 
 ## Performance

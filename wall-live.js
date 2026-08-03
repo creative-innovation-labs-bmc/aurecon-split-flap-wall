@@ -10,46 +10,49 @@
   const FLAP_W = 72;
   const GAP_X = 6;
   const SECTION_W = 540;
-  const SIDE_COLS = 7;
-  const CENTRE_START = 7;
-  const CENTRE_COLS = 35;
+  const SIDE_COLS = 8;
+  const CENTRE_START = 8;
+  const CENTRE_COLS = 33;
   const NORMAL_HALF_MS = 300;
   const FAST_HALF_MS = 105;
   const OFFICE_PAGE_MS = 14000;
   const WEATHER_REFRESH_MS = 5 * 60 * 1000;
   const COLON_PULSE_MS = 160;
+  const CARD_STAGGER_MS = 320;
+  const LINE_STAGGER_MS = 150;
+  const PAGE_CLEAR_MS = 170;
 
   const OFFICE_NAMES = [
-    { display: 'ADELAID', country: 'AUS', tz: 'Australia/Adelaide' },
-    { display: 'BRISBNE', country: 'AUS', tz: 'Australia/Brisbane' },
+    { display: 'ADELAIDE', country: 'AUS', tz: 'Australia/Adelaide' },
+    { display: 'BRISBANE', country: 'AUS', tz: 'Australia/Brisbane' },
     { display: 'CAIRNS', country: 'AUS', tz: 'Australia/Brisbane' },
-    { display: 'CANBRRA', country: 'AUS', tz: 'Australia/Sydney' },
+    { display: 'CANBERRA', country: 'AUS', tz: 'Australia/Sydney' },
     { display: 'DARWIN', country: 'AUS', tz: 'Australia/Darwin' },
-    { display: 'GLADSTN', country: 'AUS', tz: 'Australia/Brisbane' },
-    { display: 'GOLD CST', country: 'AUS', tz: 'Australia/Brisbane' },
+    { display: 'GLADSTON', country: 'AUS', tz: 'Australia/Brisbane' },
+    { display: 'GOLDCOST', country: 'AUS', tz: 'Australia/Brisbane' },
     { display: 'MACKAY', country: 'AUS', tz: 'Australia/Brisbane' },
-    { display: 'MAROOCH', country: 'AUS', tz: 'Australia/Brisbane' },
-    { display: 'NEWCSTL', country: 'AUS', tz: 'Australia/Sydney' },
+    { display: 'MAROOCHY', country: 'AUS', tz: 'Australia/Brisbane' },
+    { display: 'NEWCASTL', country: 'AUS', tz: 'Australia/Sydney' },
     { display: 'PERTH', country: 'AUS', tz: 'Australia/Perth' },
     { display: 'SYDNEY', country: 'AUS', tz: 'Australia/Sydney' },
-    { display: 'TOOWMBA', country: 'AUS', tz: 'Australia/Brisbane' },
-    { display: 'TOWNSVL', country: 'AUS', tz: 'Australia/Brisbane' },
+    { display: 'TOOWOOMB', country: 'AUS', tz: 'Australia/Brisbane' },
+    { display: 'TOWNSVIL', country: 'AUS', tz: 'Australia/Brisbane' },
     { display: 'BEIJING', country: 'CHN', tz: 'Asia/Shanghai' },
-    { display: 'SHANGHI', country: 'CHN', tz: 'Asia/Shanghai' },
-    { display: 'HONGKNG', country: 'HKG', tz: 'Asia/Hong_Kong' },
+    { display: 'SHANGHAI', country: 'CHN', tz: 'Asia/Shanghai' },
+    { display: 'HONGKONG', country: 'HKG', tz: 'Asia/Hong_Kong' },
     { display: 'JAKARTA', country: 'IDN', tz: 'Asia/Jakarta' },
     { display: 'MACAU', country: 'MAC', tz: 'Asia/Macau' },
     { display: 'JOHOR', country: 'MYS', tz: 'Asia/Kuala_Lumpur' },
-    { display: 'PETALNG', country: 'MYS', tz: 'Asia/Kuala_Lumpur' },
-    { display: 'AUCKLND', country: 'NZL', tz: 'Pacific/Auckland' },
-    { display: 'CHRISTC', country: 'NZL', tz: 'Pacific/Auckland' },
-    { display: 'HAMILTN', country: 'NZL', tz: 'Pacific/Auckland' },
-    { display: 'TAURANG', country: 'NZL', tz: 'Pacific/Auckland' },
-    { display: 'WELLNGT', country: 'NZL', tz: 'Pacific/Auckland' },
+    { display: 'PETALING', country: 'MYS', tz: 'Asia/Kuala_Lumpur' },
+    { display: 'AUCKLAND', country: 'NZL', tz: 'Pacific/Auckland' },
+    { display: 'CHRISTCH', country: 'NZL', tz: 'Pacific/Auckland' },
+    { display: 'HAMILTON', country: 'NZL', tz: 'Pacific/Auckland' },
+    { display: 'TAURANGA', country: 'NZL', tz: 'Pacific/Auckland' },
+    { display: 'WELLINGT', country: 'NZL', tz: 'Pacific/Auckland' },
     { display: 'MANILA', country: 'PHL', tz: 'Asia/Manila' },
-    { display: 'SINGAPR', country: 'SGP', tz: 'Asia/Singapore' },
+    { display: 'SINGAPOR', country: 'SGP', tz: 'Asia/Singapore' },
     { display: 'BANGKOK', country: 'THA', tz: 'Asia/Bangkok' },
-    { display: 'HOCHIMN', country: 'VNM', tz: 'Asia/Ho_Chi_Minh' }
+    { display: 'HOCHIMIN', country: 'VNM', tz: 'Asia/Ho_Chi_Minh' }
   ];
 
   const DIGITS_4X5 = {
@@ -258,7 +261,7 @@
     });
 
     addSplitColons();
-    stage.dataset.debug = '49×7 | 7 / 35 / 7 | 4×5 clock | BOM Melbourne Olympic Park';
+    stage.dataset.debug = '49×7 | 8 / 33 / 8 | 4×5 clock | BOM Melbourne Olympic Park';
   }
 
   function addSplitColons() {
@@ -328,6 +331,18 @@
     return `${part.hour}:${part.minute}`;
   }
 
+  function officeTimeLayout(timeZone, date = now()) {
+    const part = timeParts(timeZone, date);
+    return {
+      text: ` ${part.hour} ${part.minute}  `,
+      colonLocalCol: 3
+    };
+  }
+
+  function clearLine(row, startCol, width, delayBase = 0, instant = false) {
+    writeText(row, startCol, width, ' '.repeat(width), delayBase, instant);
+  }
+
   function visiblePageOffices(page) {
     const capacity = 4;
     const pageCount = Math.ceil(OFFICE_NAMES.length / capacity);
@@ -336,29 +351,61 @@
     return Array.from({ length: capacity }, (_, index) => OFFICE_NAMES[(start + index) % OFFICE_NAMES.length]);
   }
 
+  function addMiniColon(targetCell) {
+    if (!targetCell || targetCell.querySelector('.mini-colon')) return;
+    const colon = document.createElement('span');
+    colon.className = 'mini-colon';
+    targetCell.appendChild(colon);
+  }
+
+  function ensureOfficeMiniColons() {
+    const rightStart = TOTAL_COLS - SIDE_COLS;
+    const positions = [
+      [2, 3], [6, 3],
+      [2, rightStart + 3], [6, rightStart + 3]
+    ];
+    positions.forEach(([row, col]) => addMiniColon(cells[row][col]));
+  }
+
   function renderOfficeCards(date = now(), animate = true) {
     const offices = visiblePageOffices(officePage);
     const rightStart = TOTAL_COLS - SIDE_COLS;
     const cards = [
       { office: offices[0], startCol: 0, startRow: 0, delay: 0 },
-      { office: offices[1], startCol: 0, startRow: 4, delay: 260 },
-      { office: offices[2], startCol: rightStart, startRow: 0, delay: 520 },
-      { office: offices[3], startCol: rightStart, startRow: 4, delay: 780 }
+      { office: offices[1], startCol: 0, startRow: 4, delay: CARD_STAGGER_MS },
+      { office: offices[2], startCol: rightStart, startRow: 0, delay: CARD_STAGGER_MS * 2 },
+      { office: offices[3], startCol: rightStart, startRow: 4, delay: CARD_STAGGER_MS * 3 }
     ];
 
     cards.forEach((card) => {
+      const timeLayout = officeTimeLayout(card.office.tz, date);
       const lines = [
         centred(card.office.display, SIDE_COLS),
         centred(card.office.country, SIDE_COLS),
-        centred(shortTimeFor(card.office.tz, date), SIDE_COLS)
+        timeLayout.text
       ];
-      lines.forEach((line, lineIndex) => {
-        writeText(card.startRow + lineIndex, card.startCol, SIDE_COLS, line, animate ? card.delay + lineIndex * 110 : 0, !animate && noAnimation);
-      });
+      if (animate) {
+        for (let lineIndex = 0; lineIndex < 3; lineIndex += 1) {
+          clearLine(card.startRow + lineIndex, card.startCol, SIDE_COLS, card.delay + lineIndex * LINE_STAGGER_MS, false);
+          writeText(
+            card.startRow + lineIndex,
+            card.startCol,
+            SIDE_COLS,
+            lines[lineIndex],
+            card.delay + lineIndex * LINE_STAGGER_MS + PAGE_CLEAR_MS,
+            false
+          );
+        }
+      } else {
+        lines.forEach((line, lineIndex) => {
+          writeText(card.startRow + lineIndex, card.startCol, SIDE_COLS, line, 0, noAnimation);
+        });
+      }
     });
 
-    writeText(3, 0, SIDE_COLS, ' '.repeat(SIDE_COLS), 0, !animate && noAnimation);
-    writeText(3, rightStart, SIDE_COLS, ' '.repeat(SIDE_COLS), 0, !animate && noAnimation);
+    clearLine(3, 0, SIDE_COLS, 0, !animate && noAnimation);
+    clearLine(3, rightStart, SIDE_COLS, 0, !animate && noAnimation);
+    ensureOfficeMiniColons();
   }
 
   function drawPattern(pattern, rowStart, colStart, delayBase = 0, halfMs = NORMAL_HALF_MS) {
@@ -404,7 +451,13 @@
     const rain = sanitise(normaliseRain(weather.rain), 4, '--');
 
     const header = centred(`MELBOURNE AUSTRALIA ${temp}° ${condition}`, CENTRE_COLS);
-    const footer = centred(`WIND ${windDir}${windSpeed}K HUM ${humidity}% RAIN ${rain}MM`, CENTRE_COLS);
+    const footerOptions = [
+      `WIND ${windDir} ${windSpeed}KMH HUM ${humidity}% RAIN ${rain}MM`,
+      `WIND ${windDir}${windSpeed}K HUM${humidity}% RAIN${rain}MM`,
+      `${windDir}${windSpeed}K H${humidity}% R${rain}MM`
+    ];
+    const footerText = footerOptions.find((candidate) => candidate.length <= CENTRE_COLS) || footerOptions.at(-1);
+    const footer = centred(footerText, CENTRE_COLS);
     writeText(0, CENTRE_START, CENTRE_COLS, header, 0, instant);
     writeText(6, CENTRE_START, CENTRE_COLS, footer, 0, instant);
   }

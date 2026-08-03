@@ -269,3 +269,33 @@ body.debug .zone-divider { width: 2px; background: rgba(137,201,37,0.86); }
 @media (prefers-reduced-motion: reduce) {
   .flap.flipping .top-flip, .flap.flipping .bottom-flip { animation-duration: 1ms; animation-delay: 0ms; }
 }
+
+
+.mini-colon {
+  position: absolute;
+  z-index: 22;
+  left: 50%;
+  top: calc(50% - 2px);
+  width: 8px;
+  height: 28px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.mini-colon::before,
+.mini-colon::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: var(--aurecon-green);
+  box-shadow: 0 0 8px rgba(137,201,37,0.55), 0 0 16px rgba(137,201,37,0.22);
+  opacity: 1;
+  transition: opacity 90ms linear;
+}
+.mini-colon::before { top: 7px; }
+.mini-colon::after { bottom: 7px; }
+body.colon-dim .mini-colon::before,
+body.colon-dim .mini-colon::after { opacity: 0.12; }
