@@ -7,6 +7,7 @@ import pathlib
 import urllib.request
 from datetime import datetime, timezone
 
+# This script is run by GitHub Actions on push and every ten minutes.
 URLS = (
     "https://www.bom.gov.au/fwo/IDV60801/IDV60801.95936.json",
     "https://www.bom.gov.au/fwo/IDV60901/IDV60901.95936.json",
