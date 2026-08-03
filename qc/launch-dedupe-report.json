@@ -1,27 +1,27 @@
 {
-  "passed": false,
-  "startedAt": "2026-08-03T06:43:02.728Z",
+  "passed": true,
+  "startedAt": "2026-08-03T06:45:13.140Z",
   "before": {
     "launching": true,
     "dedupe": {
       "wrappedCount": 120,
-      "suppressedCount": 396,
-      "passedCount": 148,
+      "suppressedCount": 344,
+      "passedCount": 145,
       "passedByDigit": [
         20,
         20,
         20,
         20,
-        32,
+        29,
         36
       ],
       "suppressedByDigit": [
-        80,
-        76,
-        72,
-        69,
-        53,
-        46
+        66,
+        63,
+        60,
+        60,
+        51,
+        44
       ],
       "lastEvent": {
         "type": "suppressed",
@@ -29,35 +29,35 @@
         "coord": "40,6",
         "macro": false
       },
-      "updatedAt": 1785739390031
+      "updatedAt": 1785739520015
     },
     "clock": {
       "activeCells": 120,
-      "time": "16:43:10",
-      "updatedAt": 1785739390031
+      "time": "16:45:20",
+      "updatedAt": 1785739520015
     }
   },
   "after": {
     "launching": false,
     "dedupe": {
       "wrappedCount": 120,
-      "suppressedCount": 504,
-      "passedCount": 160,
+      "suppressedCount": 452,
+      "passedCount": 157,
       "passedByDigit": [
         20,
         20,
         20,
         20,
-        32,
+        29,
         48
       ],
       "suppressedByDigit": [
-        100,
-        96,
-        92,
-        89,
-        73,
-        54
+        86,
+        83,
+        80,
+        80,
+        71,
+        52
       ],
       "lastEvent": {
         "type": "passed",
@@ -65,12 +65,12 @@
         "coord": "40,6",
         "macro": true
       },
-      "updatedAt": 1785739391018
+      "updatedAt": 1785739521029
     },
     "clock": {
       "activeCells": 120,
-      "time": "16:43:11",
-      "updatedAt": 1785739391018
+      "time": "16:45:21",
+      "updatedAt": 1785739521032
     }
   },
   "deltas": {
@@ -87,16 +87,16 @@
       "1",
       "6",
       "4",
-      "3",
-      "1",
+      "5",
+      "2",
       "0"
     ],
     "afterDigits": [
       "1",
       "6",
       "4",
-      "3",
-      "1",
+      "5",
+      "2",
       "1"
     ],
     "changedDigits": [
@@ -115,15 +115,59 @@
       "details": "120"
     },
     {
-      "name": "QC samples occurred while launch was active",
-      "passed": false,
-      "details": "true / false"
+      "name": "Sampling began while the wall was launching",
+      "passed": true,
+      "details": "true"
+    },
+    {
+      "name": "The clock advanced during the sample",
+      "passed": true,
+      "details": "16:45:20 -> 16:45:21"
+    },
+    {
+      "name": "Identical macro requests were suppressed",
+      "passed": true,
+      "details": "108"
+    },
+    {
+      "name": "Unchanged digit 0 stayed still",
+      "passed": true,
+      "details": "1 -> 1, delta 0"
+    },
+    {
+      "name": "Unchanged digit 1 stayed still",
+      "passed": true,
+      "details": "6 -> 6, delta 0"
+    },
+    {
+      "name": "Unchanged digit 2 stayed still",
+      "passed": true,
+      "details": "4 -> 4, delta 0"
+    },
+    {
+      "name": "Unchanged digit 3 stayed still",
+      "passed": true,
+      "details": "5 -> 5, delta 0"
+    },
+    {
+      "name": "Unchanged digit 4 stayed still",
+      "passed": true,
+      "details": "2 -> 2, delta 0"
+    },
+    {
+      "name": "Changed digit 5 received flap updates",
+      "passed": true,
+      "details": "0 -> 1, delta 12"
+    },
+    {
+      "name": "No page errors",
+      "passed": true,
+      "details": ""
     }
   ],
   "pageErrors": [],
   "consoleErrors": [
     "Failed to load resource: the server responded with a status of 404 (File not found)"
   ],
-  "failure": "Error: QC samples occurred while launch was active: true / false\n    at assert (file:///home/runner/work/aurecon-split-flap-wall/aurecon-split-flap-wall/tools/qc_launch_dedupe.mjs:17:22)\n    at file:///home/runner/work/aurecon-split-flap-wall/aurecon-split-flap-wall/tools/qc_launch_dedupe.mjs:79:3",
-  "finishedAt": "2026-08-03T06:43:11.692Z"
+  "finishedAt": "2026-08-03T06:45:22.128Z"
 }
