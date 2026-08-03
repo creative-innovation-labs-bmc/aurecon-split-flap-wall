@@ -90,7 +90,8 @@ The BOM observation feed often leaves the plain-language weather field blank. In
 - perspective: 1600 px
 - half-flip duration: 300 ms
 - darker descending top flap
-- Aurecon green `#89C925` split-circle hero colons and blinking mini office-time colons
+- Aurecon green `#89C925` split-circle hero colons and two-dot blinking mini office-time colons
+- 1 px overlap between top and bottom text halves, with a reduced 2 px hinge for legibility
 - Aurecon grey `#373A36` stage
 
 ## Performance

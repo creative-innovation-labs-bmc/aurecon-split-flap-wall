@@ -117,7 +117,7 @@ body {
   position: absolute;
   left: 0;
   width: 100%;
-  height: 50%;
+  height: calc(50% + 1px);
   overflow: hidden;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
@@ -162,7 +162,7 @@ body {
   position: absolute;
   left: 0;
   width: 100%;
-  height: 200%;
+  height: var(--flap-h);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -181,7 +181,7 @@ body {
 }
 .macro-face span { color: transparent; text-shadow: none; }
 .panel.top span, .flip-half.top-flip span { top: 0; }
-.panel.bottom span, .flip-half.bottom-flip span { top: -100%; }
+.panel.bottom span, .flip-half.bottom-flip span { top: -45px; }
 .flip-half.top-flip {
   z-index: 5;
   transform: rotateX(0deg);
@@ -198,8 +198,8 @@ body {
   z-index: 8;
   left: 0;
   right: 0;
-  top: calc(50% - 2px);
-  height: 4px;
+  top: calc(50% - 1px);
+  height: 2px;
   background: var(--hinge);
   pointer-events: none;
 }
@@ -271,14 +271,11 @@ body.debug .zone-divider { width: 2px; background: rgba(137,201,37,0.86); }
 }
 
 
+
 .mini-colon {
   position: absolute;
-  z-index: 22;
-  left: 50%;
-  top: calc(50% - 2px);
-  width: 8px;
-  height: 28px;
-  transform: translate(-50%, -50%);
+  z-index: 24;
+  inset: 0;
   pointer-events: none;
 }
 .mini-colon::before,
@@ -286,16 +283,19 @@ body.debug .zone-divider { width: 2px; background: rgba(137,201,37,0.86); }
   content: "";
   position: absolute;
   left: 50%;
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   background: var(--aurecon-green);
-  box-shadow: 0 0 8px rgba(137,201,37,0.55), 0 0 16px rgba(137,201,37,0.22);
+  box-shadow: 0 0 8px rgba(137,201,37,0.62), 0 0 16px rgba(137,201,37,0.24);
   opacity: 1;
   transition: opacity 90ms linear;
 }
-.mini-colon::before { top: 7px; }
-.mini-colon::after { bottom: 7px; }
+.mini-colon::before { top: 29%; }
+.mini-colon::after { top: 67%; }
 body.colon-dim .mini-colon::before,
 body.colon-dim .mini-colon::after { opacity: 0.12; }
+body.launching .colon-half,
+body.launching .mini-colon::before,
+body.launching .mini-colon::after { opacity: 0; }

@@ -18,9 +18,12 @@
   const OFFICE_PAGE_MS = 14000;
   const WEATHER_REFRESH_MS = 5 * 60 * 1000;
   const COLON_PULSE_MS = 160;
-  const CARD_STAGGER_MS = 320;
-  const LINE_STAGGER_MS = 150;
-  const PAGE_CLEAR_MS = 170;
+  const OFFICE_CHAR_STAGGER_MS = 46;
+  const OFFICE_LINE_STEP_MS = 520;
+  const CARD_STAGGER_MS = 1540;
+  const LAUNCH_CELL_STAGGER_MS = 20;
+  const LAUNCH_ROW_STEP_MS = 1120;
+  const WEATHER_BOOT_TIMEOUT_MS = 1800;
 
   const OFFICE_NAMES = [
     { display: 'ADELAIDE', country: 'AUS', tz: 'Australia/Adelaide' },
@@ -284,13 +287,17 @@
     cells[row][col].update(char, macro, delay, halfMs);
   }
 
-  function writeText(row, startCol, width, text, delayBase = 0, instant = false) {
+  function writeText(row, startCol, width, text, delayBase = 0, instant = false, charStaggerMs = 9) {
     const value = String(text ?? '').slice(0, width).padEnd(width, ' ');
     for (let index = 0; index < width; index += 1) {
       const flap = cells[row][startCol + index];
       if (instant) flap.setStatic(value[index], false);
-      else flap.update(value[index], false, delayBase + index * 9, NORMAL_HALF_MS);
+      else flap.update(value[index], false, delayBase + index * charStaggerMs, NORMAL_HALF_MS);
     }
+  }
+
+  function launchDelay(row, col) {
+    return row * LAUNCH_ROW_STEP_MS + col * LAUNCH_CELL_STAGGER_MS;
   }
 
   function centred(text, width) {
@@ -339,10 +346,6 @@
     };
   }
 
-  function clearLine(row, startCol, width, delayBase = 0, instant = false) {
-    writeText(row, startCol, width, ' '.repeat(width), delayBase, instant);
-  }
-
   function visiblePageOffices(page) {
     const capacity = 4;
     const pageCount = Math.ceil(OFFICE_NAMES.length / capacity);
@@ -367,14 +370,14 @@
     positions.forEach(([row, col]) => addMiniColon(cells[row][col]));
   }
 
-  function renderOfficeCards(date = now(), animate = true) {
+  function renderOfficeCards(date = now(), mode = 'steady') {
     const offices = visiblePageOffices(officePage);
     const rightStart = TOTAL_COLS - SIDE_COLS;
     const cards = [
-      { office: offices[0], startCol: 0, startRow: 0, delay: 0 },
-      { office: offices[1], startCol: 0, startRow: 4, delay: CARD_STAGGER_MS },
-      { office: offices[2], startCol: rightStart, startRow: 0, delay: CARD_STAGGER_MS * 2 },
-      { office: offices[3], startCol: rightStart, startRow: 4, delay: CARD_STAGGER_MS * 3 }
+      { office: offices[0], startCol: 0, startRow: 0, order: 0 },
+      { office: offices[1], startCol: 0, startRow: 4, order: 1 },
+      { office: offices[2], startCol: rightStart, startRow: 0, order: 2 },
+      { office: offices[3], startCol: rightStart, startRow: 4, order: 3 }
     ];
 
     cards.forEach((card) => {
@@ -384,39 +387,50 @@
         centred(card.office.country, SIDE_COLS),
         timeLayout.text
       ];
-      if (animate) {
-        for (let lineIndex = 0; lineIndex < 3; lineIndex += 1) {
-          clearLine(card.startRow + lineIndex, card.startCol, SIDE_COLS, card.delay + lineIndex * LINE_STAGGER_MS, false);
-          writeText(
-            card.startRow + lineIndex,
-            card.startCol,
-            SIDE_COLS,
-            lines[lineIndex],
-            card.delay + lineIndex * LINE_STAGGER_MS + PAGE_CLEAR_MS,
-            false
-          );
+
+      lines.forEach((line, lineIndex) => {
+        let delayBase = 0;
+        let charStagger = 12;
+        if (mode === 'launch') {
+          delayBase = launchDelay(card.startRow + lineIndex, card.startCol);
+          charStagger = LAUNCH_CELL_STAGGER_MS;
+        } else if (mode === 'page') {
+          delayBase = card.order * CARD_STAGGER_MS + lineIndex * OFFICE_LINE_STEP_MS;
+          charStagger = OFFICE_CHAR_STAGGER_MS;
+        } else if (mode === 'minute') {
+          delayBase = card.order * 80;
+          charStagger = 18;
         }
-      } else {
-        lines.forEach((line, lineIndex) => {
-          writeText(card.startRow + lineIndex, card.startCol, SIDE_COLS, line, 0, noAnimation);
-        });
-      }
+        writeText(
+          card.startRow + lineIndex,
+          card.startCol,
+          SIDE_COLS,
+          line,
+          delayBase,
+          noAnimation,
+          charStagger
+        );
+      });
     });
 
-    clearLine(3, 0, SIDE_COLS, 0, !animate && noAnimation);
-    clearLine(3, rightStart, SIDE_COLS, 0, !animate && noAnimation);
     ensureOfficeMiniColons();
   }
 
-  function drawPattern(pattern, rowStart, colStart, delayBase = 0, halfMs = NORMAL_HALF_MS) {
+
+  function drawPattern(pattern, rowStart, colStart, mode = 'steady', delayBase = 0, halfMs = NORMAL_HALF_MS) {
     pattern.forEach((line, row) => {
       [...line].forEach((value, col) => {
-        setCell(rowStart + row, colStart + col, ' ', value === '1', delayBase + row * 8 + col * 5, halfMs);
+        const globalRow = rowStart + row;
+        const globalCol = colStart + col;
+        const delay = mode === 'launch'
+          ? launchDelay(globalRow, globalCol)
+          : delayBase + row * 8 + col * 5;
+        setCell(globalRow, globalCol, ' ', value === '1', delay, halfMs);
       });
     });
   }
 
-  function renderClock(date = now(), transition = false) {
+  function renderClock(date = now(), mode = 'steady') {
     const time = fullTimeFor('Australia/Melbourne', date);
     const digits = [time[0], time[1], time[3], time[4], time[6], time[7]];
     digits.forEach((digit, index) => {
@@ -424,11 +438,13 @@
         DIGITS_4X5[digit],
         1,
         CENTRE_START + DIGIT_STARTS[index],
-        transition ? index * 65 : 0,
-        transition ? FAST_HALF_MS : NORMAL_HALF_MS
+        mode,
+        mode === 'transition' ? index * 65 : 0,
+        mode === 'transition' ? FAST_HALF_MS : NORMAL_HALF_MS
       );
     });
   }
+
 
   function pulseColons() {
     window.clearTimeout(colonTimer);
@@ -442,7 +458,7 @@
     return n.toFixed(n < 10 ? 1 : 0);
   }
 
-  function renderMetadata(instant = false) {
+  function renderMetadata(mode = 'steady') {
     const temp = sanitise(weather.temp, 5, '--.-');
     const condition = sanitise(weather.condition, 7, 'LIVE');
     const windDir = sanitise(weather.windDir, 4, '--');
@@ -458,13 +474,26 @@
     ];
     const footerText = footerOptions.find((candidate) => candidate.length <= CENTRE_COLS) || footerOptions.at(-1);
     const footer = centred(footerText, CENTRE_COLS);
-    writeText(0, CENTRE_START, CENTRE_COLS, header, 0, instant);
-    writeText(6, CENTRE_START, CENTRE_COLS, footer, 0, instant);
+
+    const isLaunch = mode === 'launch';
+    writeText(
+      0, CENTRE_START, CENTRE_COLS, header,
+      isLaunch ? launchDelay(0, CENTRE_START) : 0,
+      noAnimation,
+      isLaunch ? LAUNCH_CELL_STAGGER_MS : 9
+    );
+    writeText(
+      6, CENTRE_START, CENTRE_COLS, footer,
+      isLaunch ? launchDelay(6, CENTRE_START) : 0,
+      noAnimation,
+      isLaunch ? LAUNCH_CELL_STAGGER_MS : 9
+    );
   }
 
-  async function loadWeather() {
+
+  async function loadWeather(render = true) {
     if (params.has('temp')) {
-      renderMetadata(false);
+      if (render) renderMetadata('steady');
       return;
     }
     try {
@@ -484,17 +513,17 @@
         const ageMs = Date.now() - new Date(weather.updatedUtc).getTime();
         if (Number.isFinite(ageMs) && ageMs > 90 * 60 * 1000) weather.condition = 'STALE';
       }
-      renderMetadata(false);
+      if (render) renderMetadata('steady');
     } catch (error) {
       console.warn('Weather update unavailable:', error);
       weather.condition = 'WAIT';
-      renderMetadata(false);
+      if (render) renderMetadata('steady');
     }
   }
 
   function tick() {
     const date = now();
-    renderClock(date, false);
+    renderClock(date, 'steady');
     const time = fullTimeFor('Australia/Melbourne', date);
     const second = Number(time.slice(-2));
     if (second !== lastSecond) {
@@ -504,28 +533,53 @@
     const minuteKey = time.slice(0, 5);
     if (minuteKey !== lastMinuteKey) {
       lastMinuteKey = minuteKey;
-      renderOfficeCards(date, false);
+      renderOfficeCards(date, 'minute');
     }
     if (!fixedDate) window.setTimeout(tick, 1000 - (Date.now() % 1000) + 8);
   }
 
-  function initialise() {
-    fitStage();
-    buildBoard();
-    renderMetadata(noAnimation);
-    renderOfficeCards(now(), !noAnimation);
-    renderClock(now(), !noAnimation);
-    loadWeather();
+  function delay(ms) {
+    return new Promise((resolve) => window.setTimeout(resolve, ms));
+  }
+
+  function startRuntime() {
+    const date = now();
+    const time = fullTimeFor('Australia/Melbourne', date);
+    lastSecond = Number(time.slice(-2));
+    lastMinuteKey = time.slice(0, 5);
+    document.body.classList.remove('launching');
+    pulseColons();
 
     if (cycleOffices && !fixedDate) {
       window.setInterval(() => {
         officePage += 1;
-        renderOfficeCards(now(), true);
+        renderOfficeCards(now(), 'page');
       }, OFFICE_PAGE_MS);
     }
-    if (!fixedDate) window.setInterval(loadWeather, WEATHER_REFRESH_MS);
-    tick();
+    if (!fixedDate) {
+      window.setInterval(() => loadWeather(true), WEATHER_REFRESH_MS);
+      tick();
+    }
   }
+
+  async function initialise() {
+    fitStage();
+    buildBoard();
+    document.body.classList.add('launching');
+
+    await Promise.race([loadWeather(false), delay(WEATHER_BOOT_TIMEOUT_MS)]);
+    const date = now();
+    renderMetadata('launch');
+    renderOfficeCards(date, 'launch');
+    renderClock(date, 'launch');
+
+    const launchEnd = launchDelay(TOTAL_ROWS - 1, TOTAL_COLS - 1) + NORMAL_HALF_MS * 2 + 160;
+    window.setTimeout(() => {
+      startRuntime();
+      loadWeather(true);
+    }, noAnimation ? 20 : launchEnd);
+  }
+
 
   window.addEventListener('resize', fitStage, { passive: true });
   if (document.fonts && document.fonts.ready) {
