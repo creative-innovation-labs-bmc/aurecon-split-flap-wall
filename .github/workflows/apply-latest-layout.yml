@@ -1,0 +1,40 @@
+name: Apply latest live-wall layout
+
+on:
+  push:
+    paths:
+      - "tools/apply_latest_layout.py"
+      - ".github/workflows/apply-latest-layout.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-latest-live-wall-layout
+  cancel-in-progress: true
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Apply approved production patch
+        run: python tools/apply_latest_layout.py
+      - name: Validate JavaScript
+        run: node --check wall-live.js
+      - name: Commit updated production files
+        run: |
+          if git diff --quiet -- wall-live.js wall-live.css README.md index.html; then
+            echo "Production files are already current"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add wall-live.js wall-live.css README.md index.html
+          git commit -m "Update live wall layout, colons and animation [skip ci]"
+          git push
