@@ -310,6 +310,18 @@
     return `${' '.repeat(left)}${clean}${' '.repeat(remaining - left)}`;
   }
 
+  function centredOfficeName(text, width) {
+    const clean = String(text ?? '').slice(0, width);
+    const remaining = width - clean.length;
+    let left = Math.floor(remaining / 2);
+    // Five- and six-character office names need one extra flap on the left
+    // to align visually with the country and time rows.
+    if (clean.length >= 5 && clean.length <= 6 && remaining > 0) {
+      left = Math.min(left + 1, remaining);
+    }
+    return `${' '.repeat(left)}${clean}${' '.repeat(remaining - left)}`;
+  }
+
   function formatterFor(timeZone) {
     if (!formatters.has(timeZone)) {
       formatters.set(timeZone, new Intl.DateTimeFormat('en-AU', {
@@ -391,7 +403,7 @@
       const detailWidth = card.isRight ? SIDE_COLS - 1 : SIDE_COLS;
       const timeLayout = officeTimeLayout(card.office.tz, detailWidth, date);
       const lines = [
-        { startCol: card.startCol, width: SIDE_COLS, text: centred(card.office.display, SIDE_COLS) },
+        { startCol: card.startCol, width: SIDE_COLS, text: centredOfficeName(card.office.display, SIDE_COLS) },
         { startCol: detailStartCol, width: detailWidth, text: centred(card.office.country, detailWidth) },
         { startCol: detailStartCol, width: detailWidth, text: timeLayout.text }
       ];
