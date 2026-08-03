@@ -1,0 +1,46 @@
+name: Apply side-aware office-name alignment
+
+on:
+  push:
+    paths:
+      - "tools/apply_side_aware_name_alignment.py"
+      - ".github/workflows/apply-side-aware-name-alignment.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-qc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Apply alignment patch and roster QC
+        run: python tools/apply_side_aware_name_alignment.py
+      - name: JavaScript syntax check
+        run: node --check wall-live.js
+      - name: Production invariants
+        run: |
+          grep -q "wall-live.js?v=8" 49x7.html
+          grep -q "wall-live.js?v=8" 49x7-live.html
+          grep -q "centredOfficeName(card.office.display, SIDE_COLS, card.isRight)" wall-live.js
+          grep -q "noindex, nofollow, noarchive" 49x7.html
+          grep -q "Content-Security-Policy" 49x7.html
+      - name: Commit production files
+        run: |
+          if git diff --quiet -- wall-live.js 49x7.html 49x7-live.html README.md; then
+            echo "No production changes required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add wall-live.js 49x7.html 49x7-live.html README.md
+          git commit -m "Fix left and right office-name centring [skip ci]"
+          git push
