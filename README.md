@@ -56,25 +56,30 @@ The office roster follows the current Aurecon locations page and includes office
 
 ## Real-time weather
 
-The wall uses the Bureau of Meteorology's Melbourne (Olympic Park) observation feed, station WMO `95936`, which is the nearest standard BOM observation used for Docklands.
+The primary source is the Bureau of Meteorology Melbourne (Olympic Park) observation feed, station WMO `95936`, which is the nearest standard BOM observation used for Docklands.
 
-A GitHub Actions workflow runs every 10 minutes:
+A GitHub Actions workflow is scheduled every 10 minutes:
 
-1. `scripts/fetch_weather.py` fetches the official BOM JSON feed.
+1. `scripts/fetch_weather.py` fetches the official BOM JSON observation.
 2. It writes a small same-origin `weather.json` file.
 3. The page refreshes `weather.json` every five minutes.
 4. Only weather characters that changed flip.
 
-This avoids browser CORS problems on GitHub Pages and keeps the NVIDIA Shield implementation static and lightweight.
+This same-origin cache avoids browser CORS problems on GitHub Pages and keeps the NVIDIA Shield implementation static and lightweight.
 
-Displayed fields:
+### Immediate fallback
 
-- current air temperature
+If `weather.json` has not been populated, is unavailable, or is more than 90 minutes old, `weather-fallback.js` requests Open-Meteo current model data for 850 Collins Street. BOM automatically takes priority again as soon as a fresh observation is available.
+
+The fallback supplies:
+
+- temperature
+- WMO-code weather label such as CLEAR, CLOUDY, RAIN or SHOWER
 - wind direction and speed
 - relative humidity
-- rain since 9 am in millimetres
+- modelled rain total since the most recent 9 am
 
-The BOM observation feed does not reliably provide a simple `SUNNY` or `CLOUDY` label. The header therefore shows `LIVE` unless the observation contains an explicit weather condition. Rain is shown in millimetres since 9 am, not as a forecast percentage.
+The BOM observation feed often leaves the plain-language weather field blank. In that case the header uses `LIVE`. Rain is displayed in millimetres since 9 am, not as a forecast percentage.
 
 ## Matched split-flap treatment
 
