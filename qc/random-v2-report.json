@@ -1,0 +1,75 @@
+{
+  "passed": true,
+  "startedAt": "2026-08-03T06:30:51.244Z",
+  "initialOffices": [
+    "TAURANGA",
+    "GLADSTON",
+    "MACKAY",
+    "PETALING"
+  ],
+  "finalSeenCount": 30,
+  "launchSamples": [
+    {
+      "activeCells": 7,
+      "time": "16:30:53",
+      "updatedAt": 1785738653012
+    },
+    {
+      "activeCells": 48,
+      "time": "16:30:55",
+      "updatedAt": 1785738655011
+    }
+  ],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (File not found)"
+  ],
+  "pageErrors": [],
+  "assertions": [
+    {
+      "name": "Initial four offices are unique",
+      "passed": true,
+      "details": "TAURANGA, GLADSTON, MACKAY, PETALING"
+    },
+    {
+      "name": "Initial group is not the normal first page",
+      "passed": true,
+      "details": "TAURANGA, GLADSTON, MACKAY, PETALING"
+    },
+    {
+      "name": "Active launch-clock cell count does not go backwards",
+      "passed": true,
+      "details": "7 -> 48"
+    },
+    {
+      "name": "Clock time changes while launch is still in progress",
+      "passed": true,
+      "details": "16:30:53 -> 16:30:55"
+    },
+    {
+      "name": "Clock changed before the wall launch completed",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "name": "All 30 offices were shown before reshuffle",
+      "passed": true,
+      "details": "30"
+    },
+    {
+      "name": "No repeated office ID before reshuffle",
+      "passed": true,
+      "details": "30 unique"
+    },
+    {
+      "name": "No random-repeat error was logged",
+      "passed": true,
+      "details": "Failed to load resource: the server responded with a status of 404 (File not found)"
+    },
+    {
+      "name": "No page errors",
+      "passed": true,
+      "details": ""
+    }
+  ],
+  "finishedAt": "2026-08-03T06:31:17.644Z"
+}
