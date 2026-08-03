@@ -71,8 +71,8 @@
     '9': ['0110', '1001', '0111', '0001', '0110']
   };
 
-  const DIGIT_STARTS = [2, 7, 13, 18, 24, 29];
-  const COLON_GAPS = [[11, 12], [22, 23]];
+  const DIGIT_STARTS = [1, 6, 12, 17, 23, 28];
+  const COLON_GAPS = [[10, 11], [21, 22]];
   const COLON_ROWS = [2, 4];
 
   const params = new URLSearchParams(window.location.search);
@@ -314,9 +314,10 @@
     const clean = String(text ?? '').slice(0, width);
     const remaining = width - clean.length;
     let left = Math.floor(remaining / 2);
-    // Right-side five- and six-letter names use true centring. Seven-letter
-    // names move one flap right to align with the inset country and time rows.
-    if (isRight && clean.length === 7 && remaining > 0) {
+    // On the right, five- and seven-letter names move one flap right to
+    // align visually with the inset country and time rows. Six-letter names
+    // remain truly centred.
+    if (isRight && (clean.length === 5 || clean.length === 7) && remaining > 0) {
       left = Math.min(left + 1, remaining);
     }
     return `${' '.repeat(left)}${clean}${' '.repeat(remaining - left)}`;

@@ -50,7 +50,7 @@ AUS
 12:25
 ```
 
-Office pages rotate every 14 seconds. Local office times update each minute. Melbourne remains permanently in the centre. The office name, country and time lines now cascade in separately, and the four cards are staggered across the wall on first load and every page change. On the right side, the country and time rows are shifted one cell inward for balanced spacing against the Melbourne zone. On the right side, five- and six-character names are truly centred; seven-character names shift one flap right to align with the inset detail rows. Five- and six-character office names use true centring on the left; on the right they shift one flap inward to align with the inset country and time rows.
+Office pages rotate every 14 seconds. Local office times update each minute. Melbourne remains permanently in the centre. The office name, country and time lines now cascade in separately, and the four cards are staggered across the wall on first load and every page change. On the right side, the country and time rows are shifted one cell inward for balanced spacing against the Melbourne zone. On the right side, five- and seven-character names shift one flap right; six-character names remain truly centred. The Melbourne HH:MM:SS macro group is offset one column left independently of its header and footer. Five- and six-character office names use true centring on the left; on the right they shift one flap inward to align with the inset country and time rows.
 
 The office roster follows the current Aurecon locations page and includes offices across Australia, New Zealand and Asia. Melbourne is excluded from the side rotation because it is the hero location.
 
