@@ -50,7 +50,7 @@ AUS
 12:25
 ```
 
-Office pages rotate every 14 seconds. Local office times update each minute. Melbourne remains permanently in the centre. The office name, country and time lines cascade in separately, and the four cards are staggered across the wall on first load and every page change.
+Office pages rotate every 14 seconds. Local office times update each minute. Melbourne remains permanently in the centre. The office name, country and time lines cascade in separately, and the four cards are staggered across the wall on first load and every page change. On the right side, the country and time rows are shifted one cell inward for balanced spacing against the Melbourne zone.
 
 The office roster follows the current Aurecon locations page and includes offices across Australia, New Zealand and Asia. Melbourne is excluded from the side rotation because it is the hero location.
 
@@ -104,6 +104,8 @@ Designed for NVIDIA Shield signage playback:
 - no framework
 - no continuous 60 fps loop
 - only changed cells animate
+- automatic Android/NVIDIA Shield mode removes expensive animated filters and reduces shadow blur while retaining the flap motion
+- launch and office changes are deliberately sequenced so the peak number of simultaneous flips stays limited
 - side office clocks update once per minute
 - weather refreshes every five minutes
 - office pages rotate every 14 seconds
@@ -123,7 +125,9 @@ Designed for NVIDIA Shield signage playback:
 | `?wind=22` | Overrides wind speed |
 | `?hum=68` | Overrides humidity |
 | `?rain=0.0` | Overrides rain since 9 am |
+| `?shield=1` | Forces the Android/NVIDIA Shield performance profile |
+| `?shield=0` | Disables automatic Shield performance mode for comparison |
 
 ## Search indexing
 
-All pages include `noindex`, `nofollow` and `noarchive`. This reduces discoverability but is not access control.
+All pages include `noindex`, `nofollow` and `noarchive`, and the root `robots.txt` disallows all crawling. The live pages also use a restrictive Content Security Policy and send no referrer. This prevents normal search indexing and limits browser capabilities, but GitHub Pages remains a public host and this is not password-based access control.

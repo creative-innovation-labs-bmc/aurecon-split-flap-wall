@@ -79,7 +79,10 @@
   const noAnimation = params.get('noanim') === '1';
   const cycleOffices = params.get('cycle') !== '0';
   const fixedDate = parseFixedDate(params.get('testutc'));
+  const shieldMode = params.get('shield') === '1'
+    || (params.get('shield') !== '0' && /Android|SHIELD|Enplug/i.test(navigator.userAgent));
   if (params.get('debug') === '1') document.body.classList.add('debug');
+  if (shieldMode) document.body.classList.add('shield-mode');
 
   const stage = document.getElementById('stage');
   const board = document.getElementById('board');
@@ -338,10 +341,13 @@
     return `${part.hour}:${part.minute}`;
   }
 
-  function officeTimeLayout(timeZone, date = now()) {
+  function officeTimeLayout(timeZone, width = SIDE_COLS, date = now()) {
     const part = timeParts(timeZone, date);
+    const text = width === SIDE_COLS - 1
+      ? ` ${part.hour} ${part.minute} `
+      : ` ${part.hour} ${part.minute}  `;
     return {
-      text: ` ${part.hour} ${part.minute}  `,
+      text,
       colonLocalCol: 3
     };
   }
@@ -365,7 +371,7 @@
     const rightStart = TOTAL_COLS - SIDE_COLS;
     const positions = [
       [2, 3], [6, 3],
-      [2, rightStart + 3], [6, rightStart + 3]
+      [2, rightStart + 4], [6, rightStart + 4]
     ];
     positions.forEach(([row, col]) => addMiniColon(cells[row][col]));
   }
@@ -374,25 +380,27 @@
     const offices = visiblePageOffices(officePage);
     const rightStart = TOTAL_COLS - SIDE_COLS;
     const cards = [
-      { office: offices[0], startCol: 0, startRow: 0, order: 0 },
-      { office: offices[1], startCol: 0, startRow: 4, order: 1 },
-      { office: offices[2], startCol: rightStart, startRow: 0, order: 2 },
-      { office: offices[3], startCol: rightStart, startRow: 4, order: 3 }
+      { office: offices[0], startCol: 0, startRow: 0, order: 0, isRight: false },
+      { office: offices[1], startCol: 0, startRow: 4, order: 1, isRight: false },
+      { office: offices[2], startCol: rightStart, startRow: 0, order: 2, isRight: true },
+      { office: offices[3], startCol: rightStart, startRow: 4, order: 3, isRight: true }
     ];
 
     cards.forEach((card) => {
-      const timeLayout = officeTimeLayout(card.office.tz, date);
+      const detailStartCol = card.isRight ? card.startCol + 1 : card.startCol;
+      const detailWidth = card.isRight ? SIDE_COLS - 1 : SIDE_COLS;
+      const timeLayout = officeTimeLayout(card.office.tz, detailWidth, date);
       const lines = [
-        centred(card.office.display, SIDE_COLS),
-        centred(card.office.country, SIDE_COLS),
-        timeLayout.text
+        { startCol: card.startCol, width: SIDE_COLS, text: centred(card.office.display, SIDE_COLS) },
+        { startCol: detailStartCol, width: detailWidth, text: centred(card.office.country, detailWidth) },
+        { startCol: detailStartCol, width: detailWidth, text: timeLayout.text }
       ];
 
       lines.forEach((line, lineIndex) => {
         let delayBase = 0;
         let charStagger = 12;
         if (mode === 'launch') {
-          delayBase = launchDelay(card.startRow + lineIndex, card.startCol);
+          delayBase = launchDelay(card.startRow + lineIndex, line.startCol);
           charStagger = LAUNCH_CELL_STAGGER_MS;
         } else if (mode === 'page') {
           delayBase = card.order * CARD_STAGGER_MS + lineIndex * OFFICE_LINE_STEP_MS;
@@ -403,9 +411,9 @@
         }
         writeText(
           card.startRow + lineIndex,
-          card.startCol,
-          SIDE_COLS,
-          line,
+          line.startCol,
+          line.width,
+          line.text,
           delayBase,
           noAnimation,
           charStagger

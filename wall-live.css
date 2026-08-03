@@ -299,3 +299,33 @@ body.colon-dim .mini-colon::after { opacity: 0.12; }
 body.launching .colon-half,
 body.launching .mini-colon::before,
 body.launching .mini-colon::after { opacity: 0; }
+
+
+/* Android/NVIDIA Shield optimisation: retain the same flap motion while
+   avoiding the most expensive blur/filter work in Android WebView. */
+.flap.flipping .flip-half { will-change: transform; }
+body.shield-mode .flap.flipping .top-flip {
+  animation-name: flipTopShield;
+  box-shadow: 0 10px 10px rgba(0,0,0,0.18);
+}
+body.shield-mode .flap.flipping .bottom-flip {
+  animation-name: flipBottomShield;
+  box-shadow: 0 -8px 8px rgba(0,0,0,0.16);
+}
+body.shield-mode .panel span,
+body.shield-mode .flip-half span { text-rendering: auto; }
+body.shield-mode .colon-half {
+  box-shadow: 0 0 7px rgba(137,201,37,0.40), 0 0 12px rgba(137,201,37,0.14);
+}
+body.shield-mode .mini-colon::before,
+body.shield-mode .mini-colon::after {
+  box-shadow: 0 0 6px rgba(137,201,37,0.48), 0 0 10px rgba(137,201,37,0.16);
+}
+@keyframes flipTopShield {
+  from { transform: rotateX(0deg); }
+  to { transform: rotateX(-90deg); }
+}
+@keyframes flipBottomShield {
+  from { transform: rotateX(90deg); }
+  to { transform: rotateX(0deg); }
+}
