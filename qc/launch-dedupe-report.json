@@ -1,0 +1,129 @@
+{
+  "passed": false,
+  "startedAt": "2026-08-03T06:43:02.728Z",
+  "before": {
+    "launching": true,
+    "dedupe": {
+      "wrappedCount": 120,
+      "suppressedCount": 396,
+      "passedCount": 148,
+      "passedByDigit": [
+        20,
+        20,
+        20,
+        20,
+        32,
+        36
+      ],
+      "suppressedByDigit": [
+        80,
+        76,
+        72,
+        69,
+        53,
+        46
+      ],
+      "lastEvent": {
+        "type": "suppressed",
+        "digitIndex": 5,
+        "coord": "40,6",
+        "macro": false
+      },
+      "updatedAt": 1785739390031
+    },
+    "clock": {
+      "activeCells": 120,
+      "time": "16:43:10",
+      "updatedAt": 1785739390031
+    }
+  },
+  "after": {
+    "launching": false,
+    "dedupe": {
+      "wrappedCount": 120,
+      "suppressedCount": 504,
+      "passedCount": 160,
+      "passedByDigit": [
+        20,
+        20,
+        20,
+        20,
+        32,
+        48
+      ],
+      "suppressedByDigit": [
+        100,
+        96,
+        92,
+        89,
+        73,
+        54
+      ],
+      "lastEvent": {
+        "type": "passed",
+        "digitIndex": 5,
+        "coord": "40,6",
+        "macro": true
+      },
+      "updatedAt": 1785739391018
+    },
+    "clock": {
+      "activeCells": 120,
+      "time": "16:43:11",
+      "updatedAt": 1785739391018
+    }
+  },
+  "deltas": {
+    "passedByDigit": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      12
+    ],
+    "suppressed": 108,
+    "beforeDigits": [
+      "1",
+      "6",
+      "4",
+      "3",
+      "1",
+      "0"
+    ],
+    "afterDigits": [
+      "1",
+      "6",
+      "4",
+      "3",
+      "1",
+      "1"
+    ],
+    "changedDigits": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "assertions": [
+    {
+      "name": "All 120 macro flaps were wrapped",
+      "passed": true,
+      "details": "120"
+    },
+    {
+      "name": "QC samples occurred while launch was active",
+      "passed": false,
+      "details": "true / false"
+    }
+  ],
+  "pageErrors": [],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (File not found)"
+  ],
+  "failure": "Error: QC samples occurred while launch was active: true / false\n    at assert (file:///home/runner/work/aurecon-split-flap-wall/aurecon-split-flap-wall/tools/qc_launch_dedupe.mjs:17:22)\n    at file:///home/runner/work/aurecon-split-flap-wall/aurecon-split-flap-wall/tools/qc_launch_dedupe.mjs:79:3",
+  "finishedAt": "2026-08-03T06:43:11.692Z"
+}
