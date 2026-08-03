@@ -314,9 +314,9 @@
     const clean = String(text ?? '').slice(0, width);
     const remaining = width - clean.length;
     let left = Math.floor(remaining / 2);
-    // Left-side names use true centring. On the right, five- and six-letter
-    // names shift one flap right to align with the inset country and time rows.
-    if (isRight && clean.length >= 5 && clean.length <= 6 && remaining > 0) {
+    // Right-side five- and six-letter names use true centring. Seven-letter
+    // names move one flap right to align with the inset country and time rows.
+    if (isRight && clean.length === 7 && remaining > 0) {
       left = Math.min(left + 1, remaining);
     }
     return `${' '.repeat(left)}${clean}${' '.repeat(remaining - left)}`;
