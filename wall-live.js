@@ -1,0 +1,483 @@
+(() => {
+  'use strict';
+
+  const STAGE_W = 3840;
+  const STAGE_H = 804;
+  const TOTAL_COLS = 49;
+  const TOTAL_ROWS = 7;
+  const COLS_PER_SECTION = 7;
+  const SECTION_COUNT = 7;
+  const FLAP_W = 72;
+  const GAP_X = 6;
+  const SECTION_W = 540;
+  const SIDE_COLS = 7;
+  const CENTRE_START = 7;
+  const CENTRE_COLS = 35;
+  const NORMAL_HALF_MS = 300;
+  const FAST_HALF_MS = 105;
+  const OFFICE_PAGE_MS = 14000;
+  const WEATHER_REFRESH_MS = 5 * 60 * 1000;
+  const COLON_PULSE_MS = 160;
+
+  const OFFICE_NAMES = [
+    { display: 'ADELAID', country: 'AUS', tz: 'Australia/Adelaide' },
+    { display: 'BRISBNE', country: 'AUS', tz: 'Australia/Brisbane' },
+    { display: 'CAIRNS', country: 'AUS', tz: 'Australia/Brisbane' },
+    { display: 'CANBRRA', country: 'AUS', tz: 'Australia/Sydney' },
+    { display: 'DARWIN', country: 'AUS', tz: 'Australia/Darwin' },
+    { display: 'GLADSTN', country: 'AUS', tz: 'Australia/Brisbane' },
+    { display: 'GOLD CST', country: 'AUS', tz: 'Australia/Brisbane' },
+    { display: 'MACKAY', country: 'AUS', tz: 'Australia/Brisbane' },
+    { display: 'MAROOCH', country: 'AUS', tz: 'Australia/Brisbane' },
+    { display: 'NEWCSTL', country: 'AUS', tz: 'Australia/Sydney' },
+    { display: 'PERTH', country: 'AUS', tz: 'Australia/Perth' },
+    { display: 'SYDNEY', country: 'AUS', tz: 'Australia/Sydney' },
+    { display: 'TOOWMBA', country: 'AUS', tz: 'Australia/Brisbane' },
+    { display: 'TOWNSVL', country: 'AUS', tz: 'Australia/Brisbane' },
+    { display: 'BEIJING', country: 'CHN', tz: 'Asia/Shanghai' },
+    { display: 'SHANGHI', country: 'CHN', tz: 'Asia/Shanghai' },
+    { display: 'HONGKNG', country: 'HKG', tz: 'Asia/Hong_Kong' },
+    { display: 'JAKARTA', country: 'IDN', tz: 'Asia/Jakarta' },
+    { display: 'MACAU', country: 'MAC', tz: 'Asia/Macau' },
+    { display: 'JOHOR', country: 'MYS', tz: 'Asia/Kuala_Lumpur' },
+    { display: 'PETALNG', country: 'MYS', tz: 'Asia/Kuala_Lumpur' },
+    { display: 'AUCKLND', country: 'NZL', tz: 'Pacific/Auckland' },
+    { display: 'CHRISTC', country: 'NZL', tz: 'Pacific/Auckland' },
+    { display: 'HAMILTN', country: 'NZL', tz: 'Pacific/Auckland' },
+    { display: 'TAURANG', country: 'NZL', tz: 'Pacific/Auckland' },
+    { display: 'WELLNGT', country: 'NZL', tz: 'Pacific/Auckland' },
+    { display: 'MANILA', country: 'PHL', tz: 'Asia/Manila' },
+    { display: 'SINGAPR', country: 'SGP', tz: 'Asia/Singapore' },
+    { display: 'BANGKOK', country: 'THA', tz: 'Asia/Bangkok' },
+    { display: 'HOCHIMN', country: 'VNM', tz: 'Asia/Ho_Chi_Minh' }
+  ];
+
+  const DIGITS_4X5 = {
+    '0': ['0110', '1001', '1001', '1001', '0110'],
+    '1': ['0010', '0110', '0010', '0010', '0111'],
+    '2': ['1110', '0001', '0110', '1000', '1111'],
+    '3': ['1110', '0001', '0110', '0001', '1110'],
+    '4': ['1001', '1001', '1111', '0001', '0001'],
+    '5': ['1111', '1000', '1110', '0001', '1110'],
+    '6': ['0110', '1000', '1110', '1001', '0110'],
+    '7': ['1111', '0001', '0010', '0100', '0100'],
+    '8': ['0110', '1001', '0110', '1001', '0110'],
+    '9': ['0110', '1001', '0111', '0001', '0110']
+  };
+
+  const DIGIT_STARTS = [2, 7, 13, 18, 24, 29];
+  const COLON_GAPS = [[11, 12], [22, 23]];
+  const COLON_ROWS = [2, 4];
+
+  const params = new URLSearchParams(window.location.search);
+  const noAnimation = params.get('noanim') === '1';
+  const cycleOffices = params.get('cycle') !== '0';
+  const fixedDate = parseFixedDate(params.get('testutc'));
+  if (params.get('debug') === '1') document.body.classList.add('debug');
+
+  const stage = document.getElementById('stage');
+  const board = document.getElementById('board');
+  const cells = Array.from({ length: TOTAL_ROWS }, () => Array(TOTAL_COLS));
+  const formatters = new Map();
+  let officePage = Number(params.get('page') || 0);
+  let lastSecond = -1;
+  let lastMinuteKey = '';
+  let colonTimer = 0;
+  let weather = {
+    temp: params.get('temp') || '--.-',
+    condition: params.get('condition') || 'WAIT',
+    windDir: params.get('winddir') || '--',
+    windSpeed: params.get('wind') || '--',
+    humidity: params.get('hum') || '--',
+    rain: params.get('rain') || '--',
+    updatedUtc: null
+  };
+
+  function parseFixedDate(value) {
+    if (!value) return null;
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  function now() {
+    return fixedDate ? new Date(fixedDate.getTime()) : new Date();
+  }
+
+  function sanitise(value, maxLength, fallback = '--') {
+    const cleaned = String(value ?? '')
+      .toUpperCase()
+      .replace(/[^A-Z0-9.°%-]/g, '')
+      .slice(0, maxLength);
+    return cleaned || fallback;
+  }
+
+  function fitStage() {
+    const scale = Math.min(window.innerWidth / STAGE_W, window.innerHeight / STAGE_H);
+    const scaledWidth = STAGE_W * scale;
+    const scaledHeight = STAGE_H * scale;
+    stage.style.left = `${Math.round((window.innerWidth - scaledWidth) / 2)}px`;
+    stage.style.top = `${Math.round((window.innerHeight - scaledHeight) / 2)}px`;
+    stage.style.transform = `scale(${scale})`;
+  }
+
+  function globalCellX(col) {
+    const section = Math.floor(col / COLS_PER_SECTION);
+    const local = col % COLS_PER_SECTION;
+    return section * SECTION_W + local * (FLAP_W + GAP_X);
+  }
+
+  function applyMacroFace(element, isMacro) {
+    element.classList.toggle('macro-face', Boolean(isMacro));
+  }
+
+  function createFlap(row, col) {
+    const flap = document.createElement('div');
+    flap.className = 'flap';
+    flap.dataset.value = ' ';
+    flap.dataset.macro = '0';
+    flap.dataset.coord = `${col + 1},${row + 1}`;
+    flap.innerHTML = [
+      '<div class="panel top"><span> </span></div>',
+      '<div class="panel bottom"><span> </span></div>',
+      '<div class="flip-half top-flip"><span> </span></div>',
+      '<div class="flip-half bottom-flip"><span> </span></div>'
+    ].join('');
+
+    const faces = {
+      top: flap.querySelector('.panel.top'),
+      bottom: flap.querySelector('.panel.bottom'),
+      topFlip: flap.querySelector('.top-flip'),
+      bottomFlip: flap.querySelector('.bottom-flip')
+    };
+    const spans = {
+      top: faces.top.querySelector('span'),
+      bottom: faces.bottom.querySelector('span'),
+      topFlip: faces.topFlip.querySelector('span'),
+      bottomFlip: faces.bottomFlip.querySelector('span')
+    };
+
+    flap._delayTimer = 0;
+    flap._timerA = 0;
+    flap._timerB = 0;
+
+    flap.cancel = () => {
+      window.clearTimeout(flap._delayTimer);
+      window.clearTimeout(flap._timerA);
+      window.clearTimeout(flap._timerB);
+      flap.classList.remove('flipping');
+      flap._delayTimer = 0;
+      flap._timerA = 0;
+      flap._timerB = 0;
+    };
+
+    flap.setStatic = (value, macro = false) => {
+      const next = String(value ?? ' ').slice(0, 1) || ' ';
+      flap.cancel();
+      flap.dataset.value = next;
+      flap.dataset.macro = macro ? '1' : '0';
+      Object.values(spans).forEach((span) => { span.textContent = next; });
+      Object.values(faces).forEach((face) => applyMacroFace(face, macro));
+    };
+
+    flap.update = (value, macro = false, delay = 0, halfMs = NORMAL_HALF_MS) => {
+      const next = String(value ?? ' ').slice(0, 1) || ' ';
+      const nextMacro = Boolean(macro);
+      const current = flap.dataset.value || ' ';
+      const currentMacro = flap.dataset.macro === '1';
+      if (current === next && currentMacro === nextMacro) return;
+
+      const run = () => {
+        flap.cancel();
+        const liveCurrent = flap.dataset.value || ' ';
+        const liveMacro = flap.dataset.macro === '1';
+        if (liveCurrent === next && liveMacro === nextMacro) return;
+
+        if (noAnimation || halfMs <= 1) {
+          flap.setStatic(next, nextMacro);
+          return;
+        }
+
+        spans.top.textContent = liveCurrent;
+        spans.bottom.textContent = liveCurrent;
+        spans.topFlip.textContent = liveCurrent;
+        spans.bottomFlip.textContent = next;
+        applyMacroFace(faces.top, liveMacro);
+        applyMacroFace(faces.bottom, liveMacro);
+        applyMacroFace(faces.topFlip, liveMacro);
+        applyMacroFace(faces.bottomFlip, nextMacro);
+
+        flap.style.setProperty('--flip-half-ms', `${halfMs}ms`);
+        flap.classList.remove('flipping');
+        void flap.offsetWidth;
+        flap.classList.add('flipping');
+
+        flap._timerA = window.setTimeout(() => {
+          spans.top.textContent = next;
+          applyMacroFace(faces.top, nextMacro);
+        }, halfMs);
+
+        flap._timerB = window.setTimeout(() => {
+          Object.values(spans).forEach((span) => { span.textContent = next; });
+          Object.values(faces).forEach((face) => applyMacroFace(face, nextMacro));
+          flap.dataset.value = next;
+          flap.dataset.macro = nextMacro ? '1' : '0';
+          flap.classList.remove('flipping');
+        }, halfMs * 2 + 20);
+      };
+
+      if (delay > 0) flap._delayTimer = window.setTimeout(run, delay);
+      else run();
+    };
+
+    return flap;
+  }
+
+  function buildBoard() {
+    for (let sectionIndex = 0; sectionIndex < SECTION_COUNT; sectionIndex += 1) {
+      const section = document.createElement('section');
+      section.className = 'section';
+      section.dataset.section = `SECTION ${sectionIndex + 1}`;
+      section.setAttribute('aria-hidden', 'true');
+
+      for (let row = 0; row < TOTAL_ROWS; row += 1) {
+        for (let localCol = 0; localCol < COLS_PER_SECTION; localCol += 1) {
+          const globalCol = sectionIndex * COLS_PER_SECTION + localCol;
+          const flap = createFlap(row, globalCol);
+          cells[row][globalCol] = flap;
+          section.appendChild(flap);
+        }
+      }
+      board.appendChild(section);
+    }
+
+    [CENTRE_START, CENTRE_START + CENTRE_COLS].forEach((col) => {
+      const divider = document.createElement('div');
+      divider.className = 'zone-divider';
+      divider.style.left = `${globalCellX(col)}px`;
+      board.appendChild(divider);
+    });
+
+    addSplitColons();
+    stage.dataset.debug = '49×7 | 7 / 35 / 7 | 4×5 clock | BOM Melbourne Olympic Park';
+  }
+
+  function addSplitColons() {
+    COLON_GAPS.forEach(([leftLocal, rightLocal]) => {
+      COLON_ROWS.forEach((row) => {
+        const leftCell = cells[row][CENTRE_START + leftLocal];
+        const rightCell = cells[row][CENTRE_START + rightLocal];
+        const leftHalf = document.createElement('span');
+        const rightHalf = document.createElement('span');
+        leftHalf.className = 'colon-half left';
+        rightHalf.className = 'colon-half right';
+        leftCell.appendChild(leftHalf);
+        rightCell.appendChild(rightHalf);
+      });
+    });
+  }
+
+  function setCell(row, col, char = ' ', macro = false, delay = 0, halfMs = NORMAL_HALF_MS) {
+    if (row < 0 || row >= TOTAL_ROWS || col < 0 || col >= TOTAL_COLS) return;
+    cells[row][col].update(char, macro, delay, halfMs);
+  }
+
+  function writeText(row, startCol, width, text, delayBase = 0, instant = false) {
+    const value = String(text ?? '').slice(0, width).padEnd(width, ' ');
+    for (let index = 0; index < width; index += 1) {
+      const flap = cells[row][startCol + index];
+      if (instant) flap.setStatic(value[index], false);
+      else flap.update(value[index], false, delayBase + index * 9, NORMAL_HALF_MS);
+    }
+  }
+
+  function centred(text, width) {
+    const clean = String(text ?? '').slice(0, width);
+    const remaining = width - clean.length;
+    const left = Math.floor(remaining / 2);
+    return `${' '.repeat(left)}${clean}${' '.repeat(remaining - left)}`;
+  }
+
+  function formatterFor(timeZone) {
+    if (!formatters.has(timeZone)) {
+      formatters.set(timeZone, new Intl.DateTimeFormat('en-AU', {
+        timeZone,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+        hourCycle: 'h23'
+      }));
+    }
+    return formatters.get(timeZone);
+  }
+
+  function timeParts(timeZone, date = now()) {
+    const parts = formatterFor(timeZone).formatToParts(date);
+    const mapped = Object.fromEntries(parts.filter((part) => part.type !== 'literal').map((part) => [part.type, part.value]));
+    if (mapped.hour === '24') mapped.hour = '00';
+    return mapped;
+  }
+
+  function fullTimeFor(timeZone, date = now()) {
+    const part = timeParts(timeZone, date);
+    return `${part.hour}:${part.minute}:${part.second}`;
+  }
+
+  function shortTimeFor(timeZone, date = now()) {
+    const part = timeParts(timeZone, date);
+    return `${part.hour}:${part.minute}`;
+  }
+
+  function visiblePageOffices(page) {
+    const capacity = 4;
+    const pageCount = Math.ceil(OFFICE_NAMES.length / capacity);
+    officePage = ((page % pageCount) + pageCount) % pageCount;
+    const start = officePage * capacity;
+    return Array.from({ length: capacity }, (_, index) => OFFICE_NAMES[(start + index) % OFFICE_NAMES.length]);
+  }
+
+  function renderOfficeCards(date = now(), animate = true) {
+    const offices = visiblePageOffices(officePage);
+    const rightStart = TOTAL_COLS - SIDE_COLS;
+    const cards = [
+      { office: offices[0], startCol: 0, startRow: 0, delay: 0 },
+      { office: offices[1], startCol: 0, startRow: 4, delay: 260 },
+      { office: offices[2], startCol: rightStart, startRow: 0, delay: 520 },
+      { office: offices[3], startCol: rightStart, startRow: 4, delay: 780 }
+    ];
+
+    cards.forEach((card) => {
+      const lines = [
+        centred(card.office.display, SIDE_COLS),
+        centred(card.office.country, SIDE_COLS),
+        centred(shortTimeFor(card.office.tz, date), SIDE_COLS)
+      ];
+      lines.forEach((line, lineIndex) => {
+        writeText(card.startRow + lineIndex, card.startCol, SIDE_COLS, line, animate ? card.delay + lineIndex * 110 : 0, !animate && noAnimation);
+      });
+    });
+
+    writeText(3, 0, SIDE_COLS, ' '.repeat(SIDE_COLS), 0, !animate && noAnimation);
+    writeText(3, rightStart, SIDE_COLS, ' '.repeat(SIDE_COLS), 0, !animate && noAnimation);
+  }
+
+  function drawPattern(pattern, rowStart, colStart, delayBase = 0, halfMs = NORMAL_HALF_MS) {
+    pattern.forEach((line, row) => {
+      [...line].forEach((value, col) => {
+        setCell(rowStart + row, colStart + col, ' ', value === '1', delayBase + row * 8 + col * 5, halfMs);
+      });
+    });
+  }
+
+  function renderClock(date = now(), transition = false) {
+    const time = fullTimeFor('Australia/Melbourne', date);
+    const digits = [time[0], time[1], time[3], time[4], time[6], time[7]];
+    digits.forEach((digit, index) => {
+      drawPattern(
+        DIGITS_4X5[digit],
+        1,
+        CENTRE_START + DIGIT_STARTS[index],
+        transition ? index * 65 : 0,
+        transition ? FAST_HALF_MS : NORMAL_HALF_MS
+      );
+    });
+  }
+
+  function pulseColons() {
+    window.clearTimeout(colonTimer);
+    document.body.classList.add('colon-dim');
+    colonTimer = window.setTimeout(() => document.body.classList.remove('colon-dim'), COLON_PULSE_MS);
+  }
+
+  function normaliseRain(value) {
+    const n = Number.parseFloat(value);
+    if (!Number.isFinite(n)) return '--';
+    return n.toFixed(n < 10 ? 1 : 0);
+  }
+
+  function renderMetadata(instant = false) {
+    const temp = sanitise(weather.temp, 5, '--.-');
+    const condition = sanitise(weather.condition, 7, 'LIVE');
+    const windDir = sanitise(weather.windDir, 4, '--');
+    const windSpeed = sanitise(weather.windSpeed, 3, '--');
+    const humidity = sanitise(weather.humidity, 3, '--');
+    const rain = sanitise(normaliseRain(weather.rain), 4, '--');
+
+    const header = centred(`MELBOURNE AUSTRALIA ${temp}° ${condition}`, CENTRE_COLS);
+    const footer = centred(`WIND ${windDir}${windSpeed}K HUM ${humidity}% RAIN ${rain}MM`, CENTRE_COLS);
+    writeText(0, CENTRE_START, CENTRE_COLS, header, 0, instant);
+    writeText(6, CENTRE_START, CENTRE_COLS, footer, 0, instant);
+  }
+
+  async function loadWeather() {
+    if (params.has('temp')) {
+      renderMetadata(false);
+      return;
+    }
+    try {
+      const response = await fetch(`weather.json?ts=${Date.now()}`, { cache: 'no-store' });
+      if (!response.ok) throw new Error(`weather ${response.status}`);
+      const data = await response.json();
+      weather = {
+        temp: data.temp_c,
+        condition: data.condition || 'LIVE',
+        windDir: data.wind_dir,
+        windSpeed: data.wind_kmh,
+        humidity: data.humidity_pct,
+        rain: data.rain_since_9am_mm,
+        updatedUtc: data.observation_utc || data.updated_utc || null
+      };
+      if (weather.updatedUtc) {
+        const ageMs = Date.now() - new Date(weather.updatedUtc).getTime();
+        if (Number.isFinite(ageMs) && ageMs > 90 * 60 * 1000) weather.condition = 'STALE';
+      }
+      renderMetadata(false);
+    } catch (error) {
+      console.warn('Weather update unavailable:', error);
+      weather.condition = 'WAIT';
+      renderMetadata(false);
+    }
+  }
+
+  function tick() {
+    const date = now();
+    renderClock(date, false);
+    const time = fullTimeFor('Australia/Melbourne', date);
+    const second = Number(time.slice(-2));
+    if (second !== lastSecond) {
+      lastSecond = second;
+      pulseColons();
+    }
+    const minuteKey = time.slice(0, 5);
+    if (minuteKey !== lastMinuteKey) {
+      lastMinuteKey = minuteKey;
+      renderOfficeCards(date, false);
+    }
+    if (!fixedDate) window.setTimeout(tick, 1000 - (Date.now() % 1000) + 8);
+  }
+
+  function initialise() {
+    fitStage();
+    buildBoard();
+    renderMetadata(noAnimation);
+    renderOfficeCards(now(), !noAnimation);
+    renderClock(now(), !noAnimation);
+    loadWeather();
+
+    if (cycleOffices && !fixedDate) {
+      window.setInterval(() => {
+        officePage += 1;
+        renderOfficeCards(now(), true);
+      }, OFFICE_PAGE_MS);
+    }
+    if (!fixedDate) window.setInterval(loadWeather, WEATHER_REFRESH_MS);
+    tick();
+  }
+
+  window.addEventListener('resize', fitStage, { passive: true });
+  if (document.fonts && document.fonts.ready) {
+    Promise.race([document.fonts.ready, new Promise((resolve) => window.setTimeout(resolve, 1500))]).then(initialise);
+  } else {
+    window.setTimeout(initialise, 80);
+  }
+})();
