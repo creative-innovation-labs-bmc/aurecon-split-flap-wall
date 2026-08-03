@@ -1,0 +1,41 @@
+name: Apply final split-flap alignment
+
+on:
+  push:
+    paths:
+      - "tools/apply_final_alignment.py"
+      - ".github/workflows/apply-final-alignment.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: final-split-flap-alignment
+  cancel-in-progress: true
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Apply targeted alignment patch and assertions
+        run: python tools/apply_final_alignment.py
+      - name: Commit tested production files
+        run: |
+          if git diff --quiet -- wall-live.js 49x7.html 49x7-live.html README.md; then
+            echo "No production changes required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add wall-live.js 49x7.html 49x7-live.html README.md
+          git commit -m "Align right office names and move Melbourne clock left [skip ci]"
+          git pull --rebase origin main
+          git push
