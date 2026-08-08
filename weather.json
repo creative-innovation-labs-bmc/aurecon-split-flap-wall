@@ -12,8 +12,8 @@
   "humidity_pct": 71,
   "rain_since_9am_mm": 0.5,
   "pressure_hpa": null,
-  "observation_local": "2026-08-09T02:30",
-  "observation_utc": "2026-08-08T16:30:34.819629Z",
-  "updated_utc": "2026-08-08T16:30:34.819629Z",
+  "observation_local": "2026-08-09T03:00",
+  "observation_utc": "2026-08-08T17:10:15.455733Z",
+  "updated_utc": "2026-08-08T17:10:15.455733Z",
   "copyright": "Weather model data provided by Open-Meteo"
 }
