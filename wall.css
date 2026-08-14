@@ -7,31 +7,27 @@
   --board-y: 66px;
   --section-w: 540px;
   --section-h: 672px;
-
   --aurecon-green: #89C925;
   --aurecon-grey: #373A36;
   --near-black: #1C1B1C;
   --white: #FFFFFF;
-
-  /* Exact treatment from the existing Melbourne split-flap clock. */
   --panel-top: #3f3f3c;
   --panel-bottom: #232322;
   --hinge: rgba(0, 0, 0, 0.86);
   --highlight: rgba(255, 255, 255, 0.08);
   --shadow: rgba(0, 0, 0, 0.22);
   --flip-half-ms: 300ms;
-
-  /* Macro cells use the whole flap face as a white bitmap pixel. */
   --macro-top: #f7f7f5;
   --macro-bottom: #d7d7d3;
 }
 
 @font-face {
-  font-family: "MP-B";
-  src: url("/Melbl8-Clock03-Split-flap/MP-B.ttf?v=20260705h") format("truetype");
-  font-weight: normal;
+  font-family: "Open Sans";
+  src: url("/aurecon-split-flap-wall-open-sans/fonts/OpenSans-Variable.ttf") format("truetype-variations");
   font-style: normal;
-  font-display: block;
+  font-weight: 300 800;
+  font-stretch: 75% 100%;
+  font-display: swap;
 }
 
 * { box-sizing: border-box; }
@@ -47,7 +43,7 @@ body {
 
 body {
   color: var(--white);
-  font-family: "MP-B", "Liberation Sans Narrow", "Arial Narrow", Arial, sans-serif;
+  font-family: "Open Sans", Arial, sans-serif;
   font-synthesis: none;
 }
 
@@ -118,8 +114,8 @@ body[data-layout="49x7"] #board {
   --flap-h: 90px;
   --gap-x: 6px;
   --gap-y: 7px;
-  --cell-font: 42px;
-  --cell-font-y: 4px;
+  --cell-font: 34px;
+  --cell-font-y: 2px;
 }
 
 body[data-layout="42x6"] #board {
@@ -129,8 +125,8 @@ body[data-layout="42x6"] #board {
   --flap-h: 107px;
   --gap-x: 6px;
   --gap-y: 6px;
-  --cell-font: 50px;
-  --cell-font-y: 5px;
+  --cell-font: 40px;
+  --cell-font-y: 3px;
 }
 
 .flap {
@@ -223,9 +219,9 @@ body[data-layout="42x6"] #board {
   justify-content: center;
   transform: translateY(var(--cell-font-y));
   color: var(--white);
-  font-family: "MP-B", "Liberation Sans Narrow", "Arial Narrow", Arial, sans-serif;
+  font-family: "Open Sans", Arial, sans-serif;
   font-size: var(--cell-font);
-  font-weight: normal;
+  font-weight: 700;
   line-height: 1;
   text-rendering: geometricPrecision;
   -webkit-font-smoothing: antialiased;
@@ -235,7 +231,10 @@ body[data-layout="42x6"] #board {
   text-shadow: 0 2px 0 rgba(0,0,0,0.14);
 }
 
-.macro-face span { color: transparent; text-shadow: none; }
+.macro-face span {
+  color: transparent;
+  text-shadow: none;
+}
 
 .panel.top span,
 .flip-half.top-flip span { top: 0; }
@@ -330,9 +329,7 @@ body[data-layout="42x6"] #board {
   margin-left: -10px;
   border-radius: 50%;
   background: var(--aurecon-green);
-  box-shadow:
-    0 0 12px rgba(137, 201, 37, 0.55),
-    0 0 30px rgba(137, 201, 37, 0.22);
+  box-shadow: 0 0 12px rgba(137, 201, 37, 0.55), 0 0 30px rgba(137, 201, 37, 0.22);
 }
 
 body[data-layout="49x7"] .hero-colon::before { top: 232px; }
@@ -347,7 +344,7 @@ body.debug #stage::after {
   left: 30px;
   top: 16px;
   color: var(--aurecon-green);
-  font: 24px Arial, sans-serif;
+  font: 24px/1 "Open Sans", Arial, sans-serif;
   letter-spacing: 0.02em;
 }
 
@@ -363,7 +360,7 @@ body.debug .section::after {
   left: 8px;
   top: 7px;
   color: rgba(137,201,37,0.92);
-  font: 16px Arial, sans-serif;
+  font: 16px/1 "Open Sans", Arial, sans-serif;
   pointer-events: none;
 }
 
@@ -374,7 +371,7 @@ body.debug .flap::before {
   left: 3px;
   top: 3px;
   color: rgba(255,255,255,0.28);
-  font: 8px Arial, sans-serif;
+  font: 8px/1 "Open Sans", Arial, sans-serif;
   pointer-events: none;
 }
 
