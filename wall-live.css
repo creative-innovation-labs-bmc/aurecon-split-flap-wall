@@ -22,11 +22,12 @@
 }
 
 @font-face {
-  font-family: "MP-B";
-  src: url("/Melbl8-Clock03-Split-flap/MP-B.ttf?v=20260705h") format("truetype");
-  font-weight: normal;
+  font-family: "Open Sans";
+  src: url("/aurecon-split-flap-wall-open-sans/fonts/OpenSans-Variable.ttf") format("truetype-variations");
   font-style: normal;
-  font-display: block;
+  font-weight: 300 800;
+  font-stretch: 75% 100%;
+  font-display: swap;
 }
 
 * { box-sizing: border-box; }
@@ -39,7 +40,7 @@ html, body {
 }
 body {
   color: var(--white);
-  font-family: "MP-B", "Liberation Sans Narrow", "Arial Narrow", Arial, sans-serif;
+  font-family: "Open Sans", Arial, sans-serif;
   font-synthesis: none;
 }
 #viewport {
@@ -66,8 +67,8 @@ body {
   --flap-h: 90px;
   --gap-x: 6px;
   --gap-y: 7px;
-  --cell-font: 38px;
-  --cell-font-y: 4px;
+  --cell-font: 34px;
+  --cell-font-y: 2px;
   position: absolute;
   left: var(--board-x);
   top: var(--board-y);
@@ -168,9 +169,9 @@ body {
   justify-content: center;
   transform: translateY(var(--cell-font-y));
   color: var(--white);
-  font-family: "MP-B", "Liberation Sans Narrow", "Arial Narrow", Arial, sans-serif;
+  font-family: "Open Sans", Arial, sans-serif;
   font-size: var(--cell-font);
-  font-weight: normal;
+  font-weight: 700;
   line-height: 1;
   text-rendering: geometricPrecision;
   -webkit-font-smoothing: antialiased;
@@ -234,7 +235,6 @@ body {
 .colon-half.left { right: 0; border-radius: 10px 0 0 10px; }
 .colon-half.right { left: 0; border-radius: 0 10px 10px 0; }
 body.colon-dim .colon-half { opacity: 0.10; }
-
 .zone-divider {
   position: absolute;
   z-index: 60;
@@ -253,7 +253,7 @@ body.debug #stage::after {
   left: 30px;
   top: 16px;
   color: var(--aurecon-green);
-  font: 22px Arial, sans-serif;
+  font: 22px/1 "Open Sans", Arial, sans-serif;
 }
 body.debug .section { outline: 2px dashed rgba(137,201,37,0.72); outline-offset: -2px; }
 body.debug .flap::before {
@@ -263,14 +263,12 @@ body.debug .flap::before {
   left: 3px;
   top: 3px;
   color: rgba(255,255,255,0.28);
-  font: 8px Arial, sans-serif;
+  font: 8px/1 "Open Sans", Arial, sans-serif;
 }
 body.debug .zone-divider { width: 2px; background: rgba(137,201,37,0.86); }
 @media (prefers-reduced-motion: reduce) {
   .flap.flipping .top-flip, .flap.flipping .bottom-flip { animation-duration: 1ms; animation-delay: 0ms; }
 }
-
-
 
 .mini-colon {
   position: absolute;
@@ -300,7 +298,6 @@ body.launching .colon-half,
 body.launching .mini-colon::before,
 body.launching .mini-colon::after { opacity: 0; }
 
-
 /* Android/NVIDIA Shield optimisation: retain the same flap motion while
    avoiding the most expensive blur/filter work in Android WebView. */
 .flap.flipping .flip-half { will-change: transform; }
@@ -328,4 +325,25 @@ body.shield-mode .mini-colon::after {
 @keyframes flipBottomShield {
   from { transform: rotateX(90deg); }
   to { transform: rotateX(0deg); }
+}
+
+/* Open Sans small text flaps. The original 4×5 matrix remains font-independent. */
+.flap span {
+  font-family: "Open Sans", Arial, sans-serif;
+  font-size: 34px;
+  font-weight: 700;
+  transform: translateY(2px);
+  letter-spacing: 0;
+}
+.flap .panel.top span,
+.flap .flip-half.top-flip span {
+  transform: translateY(0);
+}
+.flap .panel.bottom span,
+.flap .flip-half.bottom-flip span {
+  transform: translateY(2px);
+}
+.macro-face span {
+  color: transparent;
+  text-shadow: none;
 }
