@@ -9,11 +9,11 @@
   "wind_dir": "NE",
   "wind_kmh": 7,
   "gust_kmh": null,
-  "humidity_pct": 94,
+  "humidity_pct": 93,
   "rain_since_9am_mm": 0.0,
   "pressure_hpa": null,
-  "observation_local": "2026-08-18T01:30",
-  "observation_utc": "2026-08-17T15:39:04.721533Z",
-  "updated_utc": "2026-08-17T15:39:04.721533Z",
+  "observation_local": "2026-08-18T01:45",
+  "observation_utc": "2026-08-17T15:58:57.611622Z",
+  "updated_utc": "2026-08-17T15:58:57.611622Z",
   "copyright": "Weather model data provided by Open-Meteo"
 }
