@@ -4,7 +4,7 @@
   "station_wmo": null,
   "status": "ok",
   "temp_c": 7.5,
-  "apparent_temp_c": 5.0,
+  "apparent_temp_c": 4.9,
   "condition": "CLEAR",
   "wind_dir": "N",
   "wind_kmh": 10,
@@ -12,8 +12,8 @@
   "humidity_pct": 88,
   "rain_since_9am_mm": 3.3,
   "pressure_hpa": null,
-  "observation_local": "2026-08-21T05:15",
-  "observation_utc": "2026-08-20T19:18:21.661495Z",
-  "updated_utc": "2026-08-20T19:18:21.661495Z",
+  "observation_local": "2026-08-21T05:45",
+  "observation_utc": "2026-08-20T19:55:17.891870Z",
+  "updated_utc": "2026-08-20T19:55:17.891870Z",
   "copyright": "Weather model data provided by Open-Meteo"
 }
